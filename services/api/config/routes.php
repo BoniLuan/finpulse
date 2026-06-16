@@ -12,7 +12,7 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
 return static function (App $app): void {
-    $app->group('/api/v1', static function (RouteCollectorProxy $group): void {
+    $app->group('/api/v1', function (RouteCollectorProxy $group): void {
         $group->get('/health', HealthAction::class);
         $group->post('/ask', AskAction::class);
 

@@ -8,10 +8,12 @@ RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --no-p
 # ── Stage 2: runtime (php-fpm) ────────────────────────────────────────────────
 FROM php:8.3-fpm-alpine
 
-RUN apk add --no-cache postgresql-dev \
+# pdo_pgsql needs libpq at runtime and build tools to compile.
+# Redis is reached via predis (pure PHP), so no C extension is required.
+RUN apk add --no-cache postgresql-libs \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS postgresql-dev \
     && docker-php-ext-install pdo pdo_pgsql \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+    && apk del .build-deps
 
 WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
