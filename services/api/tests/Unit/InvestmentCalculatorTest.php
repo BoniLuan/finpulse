@@ -29,7 +29,7 @@ final class InvestmentCalculatorTest extends TestCase
 
     public function testAnnualToMonthlyConversion(): void
     {
-        // 12.6825% a.a. ≈ 1%/month
+        // 12.6825% per year ≈ 1%/month
         self::assertEqualsWithDelta(1.0, $this->calc->annualToMonthlyPct(12.6825), 0.001);
     }
 

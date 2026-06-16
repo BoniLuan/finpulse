@@ -23,17 +23,17 @@ GET /api/v1/health        → 200 { "status": "ok", "service": "api" }
 POST /api/v1/ask
 Content-Type: application/json
 
-{ "question": "quanto rende 10 mil na poupança em 1 ano?" }
+{ "question": "how much does 10 thousand in savings yield in 1 year?" }
 ```
 
 Response:
 
 ```json
 {
-  "answer": "Aplicando R$10.000 na poupança por 12 meses ...",
+  "answer": "Investing $10,000 in savings for 12 months ...",
   "data": { "type": "investment_return", "result": 10612.5, "inputs": { "...": "..." } },
   "sources": [
-    { "name": "BACEN SGS", "series": 196, "label": "Poupança" }
+    { "name": "BACEN SGS", "series": 196, "label": "Savings yield (monthly)" }
   ]
 }
 ```

@@ -1,9 +1,9 @@
 import { ask } from "./api";
 
 const INDICATORS: Array<{ label: string; question: string }> = [
-  { label: "Selic", question: "qual a selic atual?" },
-  { label: "IPCA", question: "qual o ipca atual?" },
-  { label: "Dólar", question: "qual o valor do dólar?" },
+  { label: "Selic", question: "what is the current selic?" },
+  { label: "IPCA", question: "what is the current ipca?" },
+  { label: "USD", question: "what is the current usd?" },
 ];
 
 async function loadIndicators(): Promise<void> {
@@ -36,14 +36,14 @@ function wireChat(): void {
     const question = input.value.trim();
     if (!question) return;
 
-    answer.textContent = "Pensando…";
+    answer.textContent = "Thinking…";
     try {
       const res = await ask(question);
       const src = res.sources?.[0];
       answer.innerHTML = `<p>${res.answer}</p>` +
-        (src ? `<small>Fonte: ${src.name} · série ${src.series} (${src.label})</small>` : "");
+        (src ? `<small>Source: ${src.name} · series ${src.series} (${src.label})</small>` : "");
     } catch (err) {
-      answer.textContent = `Erro: ${(err as Error).message}`;
+      answer.textContent = `Error: ${(err as Error).message}`;
     }
   });
 }

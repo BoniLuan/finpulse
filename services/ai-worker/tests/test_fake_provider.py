@@ -2,7 +2,7 @@ from app.providers.fake import FakeProvider
 
 
 def test_investment_intent_extracts_amount_and_months() -> None:
-    intent = FakeProvider().parse_intent("quanto rende 10 mil na poupança em 2 anos?")
+    intent = FakeProvider().parse_intent("how much does 10 thousand in savings yield over 2 years?")
     assert intent["type"] == "investment_return"
     assert intent["params"]["principal"] == 10_000
     assert intent["params"]["months"] == 24
@@ -10,13 +10,13 @@ def test_investment_intent_extracts_amount_and_months() -> None:
 
 
 def test_inflation_intent() -> None:
-    intent = FakeProvider().parse_intent("quanto R$1000 valem hoje corrigidos pela inflação?")
+    intent = FakeProvider().parse_intent("how much is 1000 worth today adjusted for inflation?")
     assert intent["type"] == "inflation_correction"
     assert intent["params"]["amount"] == 1000
 
 
-def test_indicator_value_intent_defaults_to_selic() -> None:
-    intent = FakeProvider().parse_intent("qual o cdi atual?")
+def test_indicator_value_intent() -> None:
+    intent = FakeProvider().parse_intent("what is the current cdi?")
     assert intent["type"] == "indicator_value"
     assert intent["params"]["indicator"] == "cdi"
 

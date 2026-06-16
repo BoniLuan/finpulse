@@ -12,11 +12,11 @@ namespace FinPulse\Domain\Finance;
  */
 enum Indicator: string
 {
-    case SELIC = 'selic';      // meta Selic anual
-    case CDI = 'cdi';          // CDI diário
-    case IPCA = 'ipca';        // IPCA mensal (%)
-    case USD = 'usd';          // Dólar compra (PTAX)
-    case POUPANCA = 'poupanca'; // Rendimento mensal da poupança
+    case SELIC = 'selic';      // annual Selic target rate
+    case CDI = 'cdi';          // daily CDI rate
+    case IPCA = 'ipca';        // monthly IPCA inflation (%)
+    case USD = 'usd';          // USD buy rate (PTAX)
+    case POUPANCA = 'poupanca'; // monthly savings yield
 
     public function seriesCode(): int
     {
@@ -32,11 +32,11 @@ enum Indicator: string
     public function label(): string
     {
         return match ($this) {
-            self::SELIC => 'Meta Selic (a.a.)',
-            self::CDI => 'CDI (diário)',
-            self::IPCA => 'IPCA (mensal)',
-            self::USD => 'Dólar PTAX (compra)',
-            self::POUPANCA => 'Poupança (mensal)',
+            self::SELIC => 'Selic target rate (annual)',
+            self::CDI => 'CDI rate (daily)',
+            self::IPCA => 'IPCA inflation (monthly)',
+            self::USD => 'USD/BRL PTAX (buy)',
+            self::POUPANCA => 'Savings yield (monthly)',
         };
     }
 

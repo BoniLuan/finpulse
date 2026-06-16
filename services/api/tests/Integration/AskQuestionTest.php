@@ -39,7 +39,7 @@ final class AskQuestionTest extends TestCase
             new InflationCorrector(),
         );
 
-        $result = $askQuestion->handle('quanto rende 1000 na poupanca em 12 meses?');
+        $result = $askQuestion->handle('how much does 1000 in savings yield over 12 months?');
 
         self::assertSame(Intent::INVESTMENT_RETURN, $result->data['type']);
         // 1000 at 0.5%/mo for 12 months ≈ 1061.68

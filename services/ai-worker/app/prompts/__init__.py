@@ -1,25 +1,25 @@
 """Prompt templates for the LLM providers."""
 
-INTENT_PROMPT = """Você é um classificador de intenções financeiras.
-Dada a pergunta do usuário, responda APENAS com um JSON válido no formato:
-{{"type": "<tipo>", "params": {{...}}}}
+INTENT_PROMPT = """You are a financial intent classifier.
+Given the user's question, respond ONLY with valid JSON in the format:
+{{"type": "<type>", "params": {{...}}}}
 
-Tipos possíveis:
-- "indicator_value": consultar o valor atual de um indicador.
+Possible types:
+- "indicator_value": look up the current value of an indicator.
   params: {{"indicator": "selic|cdi|ipca|usd|poupanca"}}
-- "investment_return": simular rendimento de uma aplicação.
-  params: {{"principal": <número>, "months": <int>, "indicator": "poupanca|selic|cdi"}}
-- "inflation_correction": corrigir um valor pela inflação (IPCA).
-  params: {{"amount": <número>, "months": <int>}}
+- "investment_return": simulate the return of an investment.
+  params: {{"principal": <number>, "months": <int>, "indicator": "poupanca|selic|cdi"}}
+- "inflation_correction": adjust an amount for inflation (IPCA).
+  params: {{"amount": <number>, "months": <int>}}
 
-Pergunta: {question}
+Question: {question}
 JSON:"""
 
-EXPLAIN_PROMPT = """Você é um assistente financeiro claro e objetivo.
-Explique o resultado abaixo para um leigo, em português, em 1 a 2 frases.
-Não invente números além dos fornecidos.
+EXPLAIN_PROMPT = """You are a clear, concise financial assistant.
+Explain the result below to a layperson, in English, in 1 to 2 sentences.
+Do not invent numbers beyond those provided.
 
-Intenção: {intent}
-Resultado calculado: {result}
+Intent: {intent}
+Computed result: {result}
 
-Resposta:"""
+Answer:"""

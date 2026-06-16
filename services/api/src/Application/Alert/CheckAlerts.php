@@ -36,7 +36,7 @@ final class CheckAlerts
             $channel->send(
                 $alert->userId,
                 sprintf(
-                    'Alerta: %s está em %.4f (condição: %s %.4f).',
+                    'Alert: %s is at %.4f (condition: %s %.4f).',
                     $alert->indicator->label(),
                     $value,
                     $alert->operator,

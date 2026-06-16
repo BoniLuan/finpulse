@@ -68,7 +68,7 @@ final class AskQuestion
 
         $annualPct = $this->data->latest($indicator);
         $monthlyPct = $indicator === Indicator::POUPANCA
-            ? $annualPct                       // poupança series is already monthly
+            ? $annualPct                       // savings series is already monthly
             : $this->investment->annualToMonthlyPct($annualPct);
 
         $future = $this->investment->futureValue($principal, $monthlyPct, $months);

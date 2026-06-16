@@ -3,11 +3,11 @@
 > Your AI finance assistant on chat — answers financial questions and fires
 > alerts using **real, free Brazilian Central Bank (BACEN) data** + an AI layer.
 
-FinPulse is a small but production-shaped platform: ask things like *"quanto
-rende 10 mil na poupança em 1 ano?"* or *"R$1.000 em 2010 valem quanto hoje?"*
-and get a clear, AI-explained answer backed by live SELIC / CDI / IPCA / USD
-data. You can also register alerts (e.g. *notify me when the dollar passes
-R$5.00*).
+FinPulse is a small but production-shaped platform: ask things like *"how much
+does 10 thousand in savings yield in 1 year?"* or *"what is the current dollar
+rate?"* and get a clear, AI-explained answer backed by live SELIC / CDI / IPCA /
+USD data. You can also register alerts (e.g. *notify me when the dollar passes
+5.00*).
 
 It is a portfolio project built to demonstrate **backend architecture, Docker,
 databases, authentication, API integrations, AI, automated tests, CI/CD and

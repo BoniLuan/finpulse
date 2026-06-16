@@ -12,7 +12,7 @@ def test_health() -> None:
 
 
 def test_infer_intent() -> None:
-    res = client.post("/infer/intent", json={"question": "qual a selic atual?"})
+    res = client.post("/infer/intent", json={"question": "what is the current selic?"})
     assert res.status_code == 200
     assert res.json()["type"] == "indicator_value"
 
