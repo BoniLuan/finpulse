@@ -1,0 +1,30 @@
+# Dev overrides: bind mounts for live code, exposed ports for direct access.
+# Loaded automatically by `docker compose` on top of docker-compose.yml.
+services:
+  api:
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "true"
+    volumes:
+      - ./services/api:/var/www/html
+    ports:
+      - "8080:80" # direct access to the api (bypassing the gateway)
+
+  ai-worker:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./services/ai-worker:/app
+    ports:
+      - "8000:8000"
+
+  web:
+    ports:
+      - "5173:80"
+
+  db:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"

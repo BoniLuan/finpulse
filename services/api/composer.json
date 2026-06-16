@@ -1,0 +1,42 @@
+{
+    "name": "finpulse/api",
+    "description": "FinPulse core API — PHP 8.3 + Slim 4, clean architecture.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "ext-pdo": "*",
+        "slim/slim": "^4.12",
+        "slim/psr7": "^1.6",
+        "php-di/php-di": "^7.0",
+        "firebase/php-jwt": "^6.10",
+        "monolog/monolog": "^3.6",
+        "predis/predis": "^2.2",
+        "ramsey/uuid": "^4.7",
+        "guzzlehttp/guzzle": "^7.8",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "phpstan/phpstan": "^1.11",
+        "friendsofphp/php-cs-fixer": "^3.59"
+    },
+    "autoload": {
+        "psr-4": {
+            "FinPulse\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FinPulse\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "php-cs-fixer fix --dry-run --diff && phpstan analyse",
+        "fix": "php-cs-fixer fix"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

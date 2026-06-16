@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinPulse — assistente financeiro com dados do BACEN + IA</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>FinPulse</h1>
+      <p>Pergunte sobre finanças e receba respostas com <strong>dados reais do Banco Central</strong> + IA.</p>
+    </header>
+
+    <main>
+      <section class="indicators">
+        <h2>Indicadores</h2>
+        <div id="indicators" class="cards">Carregando…</div>
+      </section>
+
+      <section class="chat">
+        <h2>Pergunte algo</h2>
+        <form id="ask-form">
+          <input id="question" type="text" autocomplete="off"
+                 placeholder="ex.: quanto rende 10 mil na poupança em 1 ano?" />
+          <button type="submit">Perguntar</button>
+        </form>
+        <div id="answer" class="answer"></div>
+      </section>
+    </main>
+
+    <footer>
+      <small>Projeto de portfólio · dados públicos BACEN SGS · IA configurável</small>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

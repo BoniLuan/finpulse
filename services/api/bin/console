@@ -1,0 +1,46 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use FinPulse\Application\Alert\CheckAlerts;
+use FinPulse\Application\Auth\RegisterUser;
+use FinPulse\Application\Alert\CreateAlert;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+/** @var \Psr\Container\ContainerInterface $container */
+$container = (require __DIR__ . '/../config/bootstrap.php')();
+
+$command = $argv[1] ?? 'help';
+
+switch ($command) {
+    case 'migrate':
+        $pdo = $container->get(PDO::class);
+        foreach (glob(__DIR__ . '/../migrations/*.sql') ?: [] as $file) {
+            fwrite(STDOUT, "applying " . basename($file) . "\n");
+            $pdo->exec((string) file_get_contents($file));
+        }
+        fwrite(STDOUT, "migrations applied\n");
+        break;
+
+    case 'seed':
+        $email = 'demo@finpulse.dev';
+        try {
+            $userId = $container->get(RegisterUser::class)->handle($email, 'changeme123');
+            $container->get(CreateAlert::class)->handle($userId, 'usd', '>', 5.00, 'log');
+            fwrite(STDOUT, "seeded user {$email} + sample USD alert\n");
+        } catch (\Throwable $e) {
+            fwrite(STDOUT, "seed skipped: {$e->getMessage()}\n");
+        }
+        break;
+
+    case 'alerts:check':
+        $triggered = $container->get(CheckAlerts::class)->handle();
+        fwrite(STDOUT, "alerts checked; {$triggered} triggered\n");
+        break;
+
+    default:
+        fwrite(STDOUT, "FinPulse console. Commands: migrate | seed | alerts:check\n");
+        break;
+}

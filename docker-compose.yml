@@ -1,0 +1,72 @@
+name: finpulse
+
+services:
+  gateway:
+    build: ./infra/gateway
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+      - web
+    restart: unless-stopped
+
+  api:
+    build: ./services/api
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      DATABASE_DSN: ${DATABASE_DSN}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-3600}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
+      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60}
+      AI_WORKER_URL: ${AI_WORKER_URL:-http://ai-worker:8000}
+      BACEN_BASE_URL: ${BACEN_BASE_URL:-https://api.bcb.gov.br}
+      BACEN_CACHE_TTL: ${BACEN_CACHE_TTL:-3600}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      ai-worker:
+        condition: service_started
+    restart: unless-stopped
+
+  ai-worker:
+    build: ./services/ai-worker
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-fake}
+      LLM_MODEL: ${LLM_MODEL:-gemini-1.5-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    restart: unless-stopped
+
+  web:
+    build: ./services/web
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-finpulse}
+      POSTGRES_USER: ${POSTGRES_USER:-finpulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-finpulse}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-finpulse}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  db-data:

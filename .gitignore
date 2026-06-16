@@ -1,0 +1,36 @@
+# Personal context — kept locally, never published
+bonifacio-luan.pdf
+gpt-conversation.md
+
+# Claude Code session data
+.claude/
+
+# Env / secrets
+.env
+*.local
+
+# PHP
+services/api/vendor/
+services/api/.phpunit.result.cache
+services/api/.php-cs-fixer.cache
+
+# Python
+services/ai-worker/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / web
+services/web/node_modules/
+services/web/dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Docker
+*.pid
