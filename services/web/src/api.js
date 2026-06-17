@@ -1,13 +1,7 @@
 // Thin API client. All requests go through the gateway under /api/v1.
 const BASE = "/api/v1";
 
-export interface AskResponse {
-  answer: string;
-  data: Record<string, unknown>;
-  sources: Array<{ name: string; series: number; label: string }>;
-}
-
-export async function ask(question: string): Promise<AskResponse> {
+export async function ask(question) {
   const res = await fetch(`${BASE}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

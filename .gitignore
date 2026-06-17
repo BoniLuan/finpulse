@@ -22,10 +22,6 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# Node / web
-services/web/node_modules/
-services/web/dist/
-
 # OS / editor
 .DS_Store
 Thumbs.db

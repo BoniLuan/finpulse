@@ -19,7 +19,7 @@ services:
 
   web:
     ports:
-      - "5173:80"
+      - "8081:80" # direct access to the web container (bypassing the gateway)
 
   db:
     ports:

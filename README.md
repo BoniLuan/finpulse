@@ -11,7 +11,7 @@ USD data. You can also register alerts (e.g. *notify me when the dollar passes
 
 It is a portfolio project built to demonstrate **backend architecture, Docker,
 databases, authentication, API integrations, AI, automated tests, CI/CD and
-observability** — not a tutorial CRUD.
+observability**
 
 ---
 
@@ -35,8 +35,9 @@ Nginx gateway.
 - **`services/ai-worker`** — Python 3.12 + FastAPI. AI only: parses natural
   language into intents and writes plain-language answers, behind a pluggable
   `LLMProvider` (default **Gemini**, swappable to Claude/OpenAI via env).
-- **`services/web`** — Vite + TypeScript. Intentionally thin UI: landing page,
-  live indicators widget, and a chat box. The backend is the star.
+- **`services/web`** — static HTML/CSS/JS (ES modules, no build step), served by
+  Nginx. Intentionally thin UI: landing page, live indicators widget, and a chat
+  box. The backend is the star.
 - **`infra/gateway`** — Nginx reverse proxy, the single public entry point.
 - **PostgreSQL** for data, **Redis** for cache + a simple queue + rate limiting.
 

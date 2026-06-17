@@ -73,4 +73,4 @@ Check items off as they land. Add new items here before starting them.
 See `CLAUDE.md` for the full list. The essentials:
 - Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 - Config via env only; never commit secrets.
-- One class per file (PHP), type-hinted Python, strict TypeScript.
+- One class per file (PHP), type-hinted Python, plain ES-module JS (no build).

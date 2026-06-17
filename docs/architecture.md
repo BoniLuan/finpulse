@@ -11,7 +11,7 @@ orchestration; Python owns AI; the frontend is thin.**
         ▼                          │
   ┌───────────┐         ┌──────────▼───────────┐      ┌──────────────────┐
   │   web     │  REST   │     api (PHP/Slim)    │ HTTP │ ai-worker (Python │
-  │ Vite + TS │────────▶│  Http/App/Domain/Infra│─────▶│  FastAPI + LLM    │
+  │ static JS │────────▶│  Http/App/Domain/Infra│─────▶│  FastAPI + LLM    │
   └───────────┘         │  auth · alerts · calc │      │  provider iface   │
                         │  BACEN client · queue │      └────────┬─────────┘
                         └───┬───────────┬───────┘               │
@@ -31,7 +31,7 @@ orchestration; Python owns AI; the frontend is thin.**
 | `gateway` | Nginx | Single public entry; routes `/api`, `/ai` (internal), `/` to web. |
 | `api` | PHP 8.3 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
-| `web` | Vite + TypeScript | Landing page, live indicators widget, chat box. |
+| `web` | static HTML/CSS/JS (ES modules, no build) | Landing page, live indicators widget, chat box. |
 | `db` | PostgreSQL 16 | Users, alerts, query logs. |
 | `redis` | Redis 7 | BACEN series cache, simple job queue, rate-limit counters. |
 
@@ -74,3 +74,4 @@ See the ADRs:
 - [0001 — Monorepo, multi-service](adr/0001-monorepo-multi-service.md)
 - [0002 — Slim + clean architecture (no full framework)](adr/0002-slim-clean-architecture.md)
 - [0003 — Pluggable LLM provider](adr/0003-pluggable-llm-provider.md)
+- [0004 — Static frontend, no build tooling](adr/0004-static-frontend-no-build.md)
