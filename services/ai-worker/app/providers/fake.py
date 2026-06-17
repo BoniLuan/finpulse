@@ -51,19 +51,33 @@ def _extract_months(text: str) -> int:
     return 12
 
 
+def _investment_params(text: str) -> dict[str, Any]:
+    indicator = _normalize_indicator(text) or "poupanca"
+    if "treasury" in text or "tesouro" in text:
+        indicator = "selic"
+    if "cdb" in text:
+        indicator = "cdi"
+
+    # A "110%" token would otherwise be mistaken for the principal; pull it out first.
+    pct = re.search(r"(\d+(?:\.\d+)?)\s*%", text)
+    text_for_amount = re.sub(r"\d+(?:\.\d+)?\s*%", " ", text) if pct else text
+
+    params: dict[str, Any] = {
+        "principal": _extract_amount(text_for_amount),
+        "months": _extract_months(text),
+        "indicator": indicator,
+    }
+    if indicator == "cdi":
+        params["percent_of_cdi"] = float(pct.group(1)) if pct else 100.0
+    return params
+
+
 class FakeProvider:
     def parse_intent(self, question: str) -> dict[str, Any]:
         text = question.lower()
 
-        if any(w in text for w in ("yield", "earn", "invest", "return", "grow")):
-            return {
-                "type": "investment_return",
-                "params": {
-                    "principal": _extract_amount(text),
-                    "months": _extract_months(text),
-                    "indicator": _normalize_indicator(text) or "poupanca",
-                },
-            }
+        if any(w in text for w in ("yield", "earn", "invest", "return", "grow", "cdb")):
+            return {"type": "investment_return", "params": _investment_params(text)}
 
         if any(w in text for w in ("worth", "inflation", "adjust", "correct")):
             return {

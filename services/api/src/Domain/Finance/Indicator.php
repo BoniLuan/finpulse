@@ -13,7 +13,7 @@ namespace FinPulse\Domain\Finance;
 enum Indicator: string
 {
     case SELIC = 'selic';      // annual Selic target rate
-    case CDI = 'cdi';          // daily CDI rate
+    case CDI = 'cdi';          // annualized CDI rate (base 252)
     case IPCA = 'ipca';        // monthly IPCA inflation (%)
     case USD = 'usd';          // USD buy rate (PTAX)
     case POUPANCA = 'poupanca'; // monthly savings yield
@@ -22,7 +22,7 @@ enum Indicator: string
     {
         return match ($this) {
             self::SELIC => 432,
-            self::CDI => 12,
+            self::CDI => 4389,
             self::IPCA => 433,
             self::USD => 1,
             self::POUPANCA => 196,
@@ -33,7 +33,7 @@ enum Indicator: string
     {
         return match ($this) {
             self::SELIC => 'Selic target rate (annual)',
-            self::CDI => 'CDI rate (daily)',
+            self::CDI => 'CDI rate (annual)',
             self::IPCA => 'IPCA inflation (monthly)',
             self::USD => 'USD/BRL PTAX (buy)',
             self::POUPANCA => 'Savings yield (monthly)',

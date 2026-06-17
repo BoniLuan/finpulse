@@ -8,7 +8,8 @@ Possible types:
 - "indicator_value": look up the current value of an indicator.
   params: {{"indicator": "selic|cdi|ipca|usd|poupanca"}}
 - "investment_return": simulate the return of an investment.
-  params: {{"principal": <number>, "months": <int>, "indicator": "poupanca|selic|cdi"}}
+  params: {{"principal": <number>, "months": <int>, "indicator": "poupanca|selic|cdi",
+           "percent_of_cdi": <number, only for cdi, e.g. 110>}}
 - "inflation_correction": adjust an amount for inflation (IPCA).
   params: {{"amount": <number>, "months": <int>}}
 

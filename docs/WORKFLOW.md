@@ -59,8 +59,8 @@ Check items off as they land. Add new items here before starting them.
 - [x] `alerts:check` console command dispatching via the `log` channel.
 
 ### ▶ Next (suggested order)
-- [ ] `GET /indicators` endpoint so the web widget stops abusing `/ask`.
-- [ ] More calculators (Tesouro Selic, CDB %CDI) + their unit tests.
+- [x] `GET /indicators` endpoint so the web widget stops abusing `/ask`.
+- [x] More calculators (Tesouro Selic, CDB %CDI) + their unit tests.
 - [ ] Real `WhatsAppChannel` (Meta Cloud API) — implement the stub, add ADR 0004.
 - [ ] Gemini provider live test + a `claude` provider adapter.
 - [ ] Alerts scheduler (cron container or queue worker) instead of manual command.

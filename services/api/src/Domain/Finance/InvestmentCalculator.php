@@ -38,4 +38,22 @@ final class InvestmentCalculator
 
         return $monthly * 100.0;
     }
+
+    /** Future value of a deposit compounding at an annual rate (e.g. Tesouro Selic ≈ Selic). */
+    public function treasurySelicReturn(float $principal, float $annualSelicPct, int $months): float
+    {
+        return $this->futureValue($principal, $this->annualToMonthlyPct($annualSelicPct), $months);
+    }
+
+    /**
+     * Future value of a CDB yielding a percentage of the CDI rate.
+     *
+     * @param float $percentOfCdi e.g. 110 for "110% of CDI"
+     */
+    public function cdbReturn(float $principal, float $annualCdiPct, float $percentOfCdi, int $months): float
+    {
+        $effectiveAnnual = $annualCdiPct * $percentOfCdi / 100.0;
+
+        return $this->futureValue($principal, $this->annualToMonthlyPct($effectiveAnnual), $months);
+    }
 }

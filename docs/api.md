@@ -17,6 +17,24 @@ All responses are JSON. Errors use the shape:
 GET /api/v1/health        → 200 { "status": "ok", "service": "api" }
 ```
 
+## Indicators
+
+```
+GET /api/v1/indicators
+```
+
+Returns the latest value of every supported indicator (a failing series yields
+`value: null` rather than an error). Used by the web indicators widget.
+
+```json
+{
+  "indicators": [
+    { "key": "selic", "label": "Selic target rate (annual)", "value": 14.5, "series": 432 },
+    { "key": "ipca",  "label": "IPCA inflation (monthly)",    "value": 0.46, "series": 433 }
+  ]
+}
+```
+
 ## Ask (core flow)
 
 ```
@@ -37,6 +55,10 @@ Response:
   ]
 }
 ```
+
+Supported intents: `indicator_value`, `investment_return` (savings, Tesouro
+Selic, or CDB — pass `indicator: cdi` with `percent_of_cdi` for "% of CDI"),
+and `inflation_correction`.
 
 Rate limited per client IP (see `RATE_LIMIT_*`). Returns `429` when exceeded.
 

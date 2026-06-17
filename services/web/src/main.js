@@ -1,10 +1,12 @@
-import { ask } from "./api.js";
+import { ask, getIndicators } from "./api.js";
 
-const INDICATORS = [
-  { icon: "📈", label: "Selic", caption: "annual target", question: "what is the current selic?", fmt: (v) => `${v}%` },
-  { icon: "🛒", label: "IPCA", caption: "monthly inflation", question: "what is the current ipca?", fmt: (v) => `${v}%` },
-  { icon: "💵", label: "USD", caption: "PTAX buy", question: "what is the current usd?", fmt: (v) => `R$ ${v}` },
-];
+// Display config per indicator key (icon, caption, value formatter).
+const DISPLAY = {
+  selic: { icon: "📈", caption: "annual target", fmt: (v) => `${v}%` },
+  ipca: { icon: "🛒", caption: "monthly inflation", fmt: (v) => `${v}%` },
+  usd: { icon: "💵", caption: "PTAX buy", fmt: (v) => `R$ ${v}` },
+};
+const SHOWN = ["selic", "ipca", "usd"];
 
 const SUGGESTIONS = [
   "How much does 10 thousand in savings yield in 1 year?",
@@ -12,25 +14,32 @@ const SUGGESTIONS = [
   "How much is 1000 worth adjusted for inflation over 12 months?",
 ];
 
-function loadIndicators() {
+async function loadIndicators() {
   const el = document.getElementById("indicators");
   el.innerHTML = "";
-  for (const ind of INDICATORS) {
+  const valueEls = {};
+  for (const key of SHOWN) {
+    const d = DISPLAY[key];
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML =
-      `<div class="card-top"><span class="card-icon">${ind.icon}</span>` +
-      `<span class="card-label">${ind.label}</span></div>` +
+      `<div class="card-top"><span class="card-icon">${d.icon}</span>` +
+      `<span class="card-label">${key.toUpperCase()}</span></div>` +
       `<div class="card-value"><span class="skeleton"></span></div>` +
-      `<div class="card-caption">${ind.caption}</div>`;
+      `<div class="card-caption">${d.caption}</div>`;
     el.appendChild(card);
-    const valueEl = card.querySelector(".card-value");
-    ask(ind.question)
-      .then((r) => {
-        const v = r.data?.value;
-        valueEl.textContent = v !== undefined ? ind.fmt(v) : "—";
-      })
-      .catch(() => { valueEl.textContent = "—"; });
+    valueEls[key] = card.querySelector(".card-value");
+  }
+
+  try {
+    const { indicators } = await getIndicators();
+    const byKey = Object.fromEntries(indicators.map((i) => [i.key, i]));
+    for (const key of SHOWN) {
+      const v = byKey[key]?.value;
+      valueEls[key].textContent = v != null ? DISPLAY[key].fmt(v) : "—";
+    }
+  } catch {
+    for (const key of SHOWN) valueEls[key].textContent = "—";
   }
 }
 

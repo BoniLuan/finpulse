@@ -38,4 +38,21 @@ final class InvestmentCalculatorTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->calc->futureValue(-1, 1.0, 12);
     }
+
+    public function testTreasurySelicReturn(): void
+    {
+        // 12.6825% a year for 12 months → 1000 * 1.126825 ≈ 1126.83
+        self::assertEqualsWithDelta(1126.83, $this->calc->treasurySelicReturn(1000, 12.6825, 12), 0.05);
+    }
+
+    public function testCdbReturnAt100PercentMatchesPlainRate(): void
+    {
+        self::assertEqualsWithDelta(1126.83, $this->calc->cdbReturn(1000, 12.6825, 100, 12), 0.05);
+    }
+
+    public function testCdbReturnAt110PercentYieldsMore(): void
+    {
+        // effective annual = 12.6825 * 1.10 = 13.95075% → 1000 * 1.1395075 ≈ 1139.51
+        self::assertEqualsWithDelta(1139.51, $this->calc->cdbReturn(1000, 12.6825, 110, 12), 0.05);
+    }
 }

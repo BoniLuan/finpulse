@@ -9,6 +9,17 @@ def test_investment_intent_extracts_amount_and_months() -> None:
     assert intent["params"]["indicator"] == "poupanca"
 
 
+def test_cdb_intent_extracts_percent_of_cdi() -> None:
+    intent = FakeProvider().parse_intent(
+        "how much does a CDB at 110% of CDI on 5000 yield over 2 years?"
+    )
+    assert intent["type"] == "investment_return"
+    assert intent["params"]["indicator"] == "cdi"
+    assert intent["params"]["percent_of_cdi"] == 110.0
+    assert intent["params"]["principal"] == 5000
+    assert intent["params"]["months"] == 24
+
+
 def test_inflation_intent() -> None:
     intent = FakeProvider().parse_intent("how much is 1000 worth today adjusted for inflation?")
     assert intent["type"] == "inflation_correction"

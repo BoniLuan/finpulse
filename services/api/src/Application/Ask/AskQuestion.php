@@ -65,26 +65,41 @@ final class AskQuestion
         $principal = (float) $intent->param('principal', 0);
         $months = (int) $intent->param('months', 12);
         $indicator = $this->resolveIndicator($intent->param('indicator', 'poupanca'));
+        $percentOfCdi = (float) $intent->param('percent_of_cdi', 100);
 
-        $annualPct = $this->data->latest($indicator);
-        $monthlyPct = $indicator === Indicator::POUPANCA
-            ? $annualPct                       // savings series is already monthly
-            : $this->investment->annualToMonthlyPct($annualPct);
+        $rate = $this->data->latest($indicator);
 
-        $future = $this->investment->futureValue($principal, $monthlyPct, $months);
-
-        return [
-            [
-                'type' => Intent::INVESTMENT_RETURN,
-                'principal' => $principal,
-                'months' => $months,
-                'indicator' => $indicator->value,
-                'monthly_rate_pct' => round($monthlyPct, 4),
-                'result' => $future,
-                'earnings' => round($future - $principal, 2),
+        // Pick the right product math per indicator.
+        [$future, $monthlyPct] = match ($indicator) {
+            Indicator::POUPANCA => [
+                // savings series is already a monthly rate
+                $this->investment->futureValue($principal, $rate, $months),
+                $rate,
             ],
-            [$this->source($indicator)],
+            Indicator::CDI => [
+                $this->investment->cdbReturn($principal, $rate, $percentOfCdi, $months),
+                $this->investment->annualToMonthlyPct($rate * $percentOfCdi / 100),
+            ],
+            default => [
+                $this->investment->treasurySelicReturn($principal, $rate, $months),
+                $this->investment->annualToMonthlyPct($rate),
+            ],
+        };
+
+        $data = [
+            'type' => Intent::INVESTMENT_RETURN,
+            'principal' => $principal,
+            'months' => $months,
+            'indicator' => $indicator->value,
+            'monthly_rate_pct' => round($monthlyPct, 4),
+            'result' => $future,
+            'earnings' => round($future - $principal, 2),
         ];
+        if ($indicator === Indicator::CDI) {
+            $data['percent_of_cdi'] = $percentOfCdi;
+        }
+
+        return [$data, [$this->source($indicator)]];
     }
 
     /** @return array{0: array<string,mixed>, 1: list<array<string,mixed>>} */
