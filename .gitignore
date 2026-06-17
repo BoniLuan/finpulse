@@ -12,6 +12,7 @@ gpt-conversation.md
 # PHP
 services/api/vendor/
 services/api/.phpunit.result.cache
+services/api/.phpunit.cache/
 services/api/.php-cs-fixer.cache
 
 # Python
@@ -27,6 +28,7 @@ __pycache__/
 Thumbs.db
 .idea/
 .vscode/
+!.vscode/launch.json
 
 # Docker
 *.pid

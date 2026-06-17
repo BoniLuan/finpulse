@@ -15,6 +15,15 @@ RUN apk add --no-cache postgresql-libs \
     && docker-php-ext-install pdo pdo_pgsql \
     && apk del .build-deps
 
+# Xdebug for step debugging. The extension is always installed but stays OFF
+# unless XDEBUG_MODE=debug is set (done in docker-compose.override.yml for dev),
+# so production is unaffected.
+RUN apk add --no-cache --virtual .xdebug-deps $PHPIZE_DEPS linux-headers \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && apk del .xdebug-deps
+COPY docker/xdebug.ini /usr/local/etc/php/conf.d/zz-xdebug.ini
+
 WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
