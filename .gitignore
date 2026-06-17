@@ -27,7 +27,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
+.vscode/*
 !.vscode/launch.json
 
 # Docker
