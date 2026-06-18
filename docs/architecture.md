@@ -75,3 +75,4 @@ See the ADRs:
 - [0002 — Slim + clean architecture (no full framework)](adr/0002-slim-clean-architecture.md)
 - [0003 — Pluggable LLM provider](adr/0003-pluggable-llm-provider.md)
 - [0004 — Static frontend, no build tooling](adr/0004-static-frontend-no-build.md)
+- [0005 — Gemini via the google-genai SDK with schema JSON](adr/0005-gemini-genai-sdk.md)

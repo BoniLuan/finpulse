@@ -1,20 +1,20 @@
 """Prompt templates for the LLM providers."""
 
-INTENT_PROMPT = """You are a financial intent classifier.
-Given the user's question, respond ONLY with valid JSON in the format:
-{{"type": "<type>", "params": {{...}}}}
+# Used with schema-enforced JSON output (see GeminiProvider). The response shape
+# is guaranteed by the schema; this only conveys the semantics of each field.
+INTENT_INSTRUCTION = """Classify the user's finance question and extract its parameters.
 
-Possible types:
-- "indicator_value": look up the current value of an indicator.
-  params: {{"indicator": "selic|cdi|ipca|usd|poupanca"}}
-- "investment_return": simulate the return of an investment.
-  params: {{"principal": <number>, "months": <int>, "indicator": "poupanca|selic|cdi",
-           "percent_of_cdi": <number, only for cdi, e.g. 110>}}
-- "inflation_correction": adjust an amount for inflation (IPCA).
-  params: {{"amount": <number>, "months": <int>}}
+Set "type" to one of:
+- "indicator_value": the user asks for the current value of an indicator.
+- "investment_return": the user asks how much an amount would yield.
+- "inflation_correction": the user asks what an amount is worth after inflation.
 
-Question: {question}
-JSON:"""
+Fill only the relevant fields:
+- indicator: one of selic, cdi, ipca, usd, poupanca
+- principal, months: for investment_return
+- percent_of_cdi: when a CDB is quoted as a percentage of CDI (set indicator=cdi)
+- amount, months: for inflation_correction
+"""
 
 EXPLAIN_PROMPT = """You are a clear, concise financial assistant.
 Explain the result below to a layperson, in English, in 1 to 2 sentences.
