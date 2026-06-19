@@ -72,13 +72,19 @@ POST /api/v1/auth/login      { "email": "...", "password": "..." }  → 200 { "t
 `token` is a JWT to be sent as `Authorization: Bearer <token>` on protected
 routes.
 
-## Alerts (protected)
-
 ```
-POST /api/v1/alerts
-Authorization: Bearer <token>
-
-{ "indicator": "usd", "operator": ">", "threshold": 5.00, "channel": "log" }
+GET /api/v1/auth/me      Authorization: Bearer <token>   → 200 { "id", "email" }
 ```
 
-Returns `201 { "id" }`. Evaluated by `php bin/console alerts:check`.
+## Alerts (protected, user-scoped)
+
+All alert routes require `Authorization: Bearer <token>` and operate only on the
+authenticated user's alerts.
+
+```
+GET    /api/v1/alerts            → 200 { "alerts": [ { id, indicator, operator, threshold, channel } ] }
+POST   /api/v1/alerts            { "indicator": "usd", "operator": ">", "threshold": 5.00, "channel": "log" }  → 201 { "id" }
+DELETE /api/v1/alerts/{id}       → 204 on success, 404 if not found / not owned
+```
+
+Stored alerts are evaluated by `php bin/console alerts:check`.

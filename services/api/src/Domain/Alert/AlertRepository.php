@@ -10,4 +10,10 @@ interface AlertRepository
 
     /** @return list<Alert> */
     public function all(): array;
+
+    /** @return list<Alert> */
+    public function findByUser(string $userId): array;
+
+    /** Delete an alert only if it belongs to the user. Returns true if a row was removed. */
+    public function deleteForUser(string $id, string $userId): bool;
 }

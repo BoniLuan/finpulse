@@ -38,6 +38,35 @@ final class PdoAlertRepository implements AlertRepository
             ->query('SELECT id, user_id, indicator, operator, threshold, channel FROM alerts')
             ->fetchAll(PDO::FETCH_ASSOC);
 
+        return $this->hydrate($rows);
+    }
+
+    /** @return list<Alert> */
+    public function findByUser(string $userId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, user_id, indicator, operator, threshold, channel
+             FROM alerts WHERE user_id = :uid ORDER BY created_at DESC',
+        );
+        $stmt->execute(['uid' => $userId]);
+
+        return $this->hydrate($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function deleteForUser(string $id, string $userId): bool
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM alerts WHERE id = :id AND user_id = :uid');
+        $stmt->execute(['id' => $id, 'uid' => $userId]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return list<Alert>
+     */
+    private function hydrate(array $rows): array
+    {
         return array_map(
             static fn (array $r): Alert => new Alert(
                 $r['id'],
