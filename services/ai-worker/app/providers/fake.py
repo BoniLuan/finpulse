@@ -95,15 +95,15 @@ class FakeProvider:
 
         if kind == "investment_return":
             return (
-                f"Investing ${result['principal']:.2f} for {result['months']} months "
+                f"Investing R$ {result['principal']:.2f} for {result['months']} months "
                 f"in {result['indicator']} (~{result['monthly_rate_pct']:.4f}% per month) "
-                f"would grow to ${result['result']:.2f} "
-                f"— a gain of ${result['earnings']:.2f}."
+                f"would grow to R$ {result['result']:.2f} "
+                f"— a gain of R$ {result['earnings']:.2f}."
             )
         if kind == "inflation_correction":
             return (
-                f"${result['amount']:.2f} adjusted for accumulated inflation "
-                f"({result['accumulated_pct']:.2f}%) is worth ${result['corrected']:.2f}."
+                f"R$ {result['amount']:.2f} adjusted for accumulated inflation "
+                f"({result['accumulated_pct']:.2f}%) is worth R$ {result['corrected']:.2f}."
             )
         return (
             f"The latest value of {result.get('indicator', 'the indicator')} "

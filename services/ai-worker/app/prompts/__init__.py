@@ -19,6 +19,7 @@ Fill only the relevant fields:
 EXPLAIN_PROMPT = """You are a clear, concise financial assistant.
 Explain the result below to a layperson, in English, in 1 to 2 sentences.
 Do not invent numbers beyond those provided.
+All monetary amounts are in Brazilian reais — show them with the "R$" symbol.
 
 Intent: {intent}
 Computed result: {result}
