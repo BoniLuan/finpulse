@@ -57,11 +57,13 @@ Check items off as they land. Add new items here before starting them.
 - [x] Vertical slice: `POST /ask` (intent → BACEN → calc → AI answer → log).
 - [x] Auth (register/login, JWT) + protected `POST /alerts`.
 - [x] `alerts:check` console command dispatching via the `log` channel.
+- [x] End-to-end auth UI: web login/register + user-scoped alerts (list/create/
+      delete) via `GET/POST/DELETE /alerts` and `GET /auth/me`.
 
 ### ▶ Next (suggested order)
 - [x] `GET /indicators` endpoint so the web widget stops abusing `/ask`.
 - [x] More calculators (Tesouro Selic, CDB %CDI) + their unit tests.
-- [ ] Real `WhatsAppChannel` (Meta Cloud API) — implement the stub, add ADR 0004.
+- [ ] Real `WhatsAppChannel` (Meta Cloud API) — implement the stub, add an ADR.
 - [x] Gemini provider (`google-genai`, schema JSON) — implemented (ADR 0005).
 - [ ] `claude` / `openai` provider adapters.
 - [ ] Alerts scheduler (cron container or queue worker) instead of manual command.

@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <nav class="topbar">
+      <span class="brand">FinPulse</span>
+      <div id="auth-controls" class="auth-controls"></div>
+    </nav>
+
     <header class="hero">
       <span class="badge">✨ Real Central Bank data + AI</span>
       <h1>FinPulse</h1>
@@ -32,12 +37,21 @@
           <div id="answer" class="answer"></div>
         </div>
       </section>
+
+      <section class="alerts">
+        <h2>My alerts</h2>
+        <div id="alerts-panel" class="panel"></div>
+      </section>
     </main>
 
     <footer>
       <small>Portfolio project · public BACEN SGS data · pluggable AI ·
         <a href="https://github.com/BoniLuan/finpulse" target="_blank" rel="noopener">source on GitHub</a></small>
     </footer>
+
+    <dialog id="auth-modal" class="modal">
+      <div id="auth-modal-body"></div>
+    </dialog>
 
     <script type="module" src="/src/main.js"></script>
   </body>

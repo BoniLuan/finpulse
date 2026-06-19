@@ -186,6 +186,113 @@ button:disabled { opacity: 0.6; cursor: default; transform: none; }
 .typing span:nth-child(3) { animation-delay: 0.3s; }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
 
+/* ── Account & alerts ─────────────────────────────────────────────────── */
+.ghost {
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--line);
+  font-weight: 600;
+}
+.ghost:hover { background: var(--bg-soft); filter: none; }
+
+/* Top navigation bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand {
+  font-weight: 800;
+  font-size: 1.1rem;
+  background: linear-gradient(120deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.auth-controls { display: flex; align-items: center; gap: 0.6rem; }
+.auth-controls .who { color: var(--muted); font-size: 0.9rem; }
+.auth-controls button { padding: 0.5rem 1rem; font-size: 0.9rem; }
+
+/* Empty call-to-action (logged-out alerts panel) */
+.empty-cta { text-align: center; padding: 1rem 0.5rem; }
+.empty-cta p { color: var(--muted); margin: 0 0 1rem; }
+
+/* Auth modal (native <dialog>) */
+.modal {
+  border: 0;
+  border-radius: var(--radius);
+  padding: 0;
+  width: min(92vw, 26rem);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+.modal::backdrop { background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(2px); }
+#auth-modal-body { padding: 1.5rem; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.tabs { display: flex; gap: 0.25rem; background: var(--bg-soft); padding: 0.25rem; border-radius: 10px; }
+.tab {
+  background: transparent; color: var(--muted); border: 0;
+  padding: 0.45rem 0.9rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+}
+.tab.active { background: #fff; color: var(--brand); box-shadow: var(--shadow); }
+.modal-close {
+  background: transparent; color: var(--muted); border: 0;
+  font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 0 0.25rem;
+}
+.modal-close:hover { color: var(--text); transform: none; }
+
+.modal-form { display: flex; flex-direction: column; gap: 0.35rem; }
+.modal-form label { font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; flex-direction: column; gap: 0.35rem; }
+.modal-form input {
+  padding: 0.7rem 0.9rem; border-radius: 10px; border: 1px solid var(--line);
+  background: #fff; color: var(--text); font-size: 1rem; font-weight: 400;
+}
+.modal-form input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px var(--ring); }
+.modal-form button.full { width: 100%; margin-top: 0.75rem; }
+.modal-form button { padding: 0.8rem 1.2rem; }
+.stepper { font-size: 0.8rem; font-weight: 600; color: var(--brand); margin-bottom: 1rem; }
+.muted-line { color: var(--muted); font-size: 0.9rem; margin: 0 0 0.25rem; }
+.step-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.step-actions button { flex: 1; }
+.field-err { color: #dc2626; font-size: 0.8rem; margin: 0; min-height: 1rem; }
+.form-msg { font-size: 0.85rem; margin: 0.5rem 0 0; min-height: 1rem; }
+.form-msg.err { color: #dc2626; }
+.form-msg.ok { color: #16a34a; }
+.pw-reqs { list-style: none; margin: 0.1rem 0 0.4rem; padding: 0; font-size: 0.8rem; color: var(--muted); }
+.pw-reqs li::before { content: "○ "; }
+.pw-reqs li.ok { color: #16a34a; }
+.pw-reqs li.ok::before { content: "✓ "; }
+
+.alert-form { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+.alert-form input, .alert-form select {
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.alert-form input { flex: 1; min-width: 7rem; }
+
+.alert-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.alert-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+}
+.alert-list .empty { justify-content: center; color: var(--muted); }
+
 footer { text-align: center; color: var(--muted); padding: 1rem 1.25rem 3rem; font-size: 0.85rem; }
 footer a { color: var(--brand); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
