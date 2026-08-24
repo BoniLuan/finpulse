@@ -56,6 +56,10 @@ Response:
 }
 ```
 
+The bearer token is optional. When valid, the completed question and answer are
+attached to that user and become available through the history endpoints.
+Anonymous questions are not retained by the API.
+
 Supported intents: `indicator_value`, `investment_return` (savings, Tesouro
 Selic, or CDB — pass `indicator: cdi` with `percent_of_cdi` for "% of CDI"),
 and `inflation_correction`.
@@ -92,3 +96,15 @@ automatically by the `scheduler` service (which runs `php bin/console
 alerts:check` on an interval) and dispatched through that channel, with a
 per-alert cooldown to avoid repeat notifications. An unsupported channel is
 rejected with `400`.
+
+### Conversation history
+
+All history routes require `Authorization: Bearer <token>` and are user-scoped.
+
+```text
+GET    /api/v1/history       → 200 { "history": [ { id, question, answer, sources, created_at } ] }
+DELETE /api/v1/history/{id}  → 204 on success, 404 if not found / not owned
+```
+
+Guest history is intentionally a frontend concern and remains in browser
+`sessionStorage` only.

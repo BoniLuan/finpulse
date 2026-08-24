@@ -32,7 +32,7 @@ async function request(path, { method = "GET", body, auth = false } = {}) {
 }
 
 export const getIndicators = () => request("/indicators");
-export const ask = (question) => request("/ask", { method: "POST", body: { question } });
+export const ask = (question) => request("/ask", { method: "POST", body: { question }, auth: true });
 
 export const register = (email, password) =>
   request("/auth/register", { method: "POST", body: { email, password } });
@@ -43,3 +43,5 @@ export const me = () => request("/auth/me", { auth: true });
 export const listAlerts = () => request("/alerts", { auth: true });
 export const createAlert = (alert) => request("/alerts", { method: "POST", body: alert, auth: true });
 export const deleteAlert = (id) => request(`/alerts/${id}`, { method: "DELETE", auth: true });
+export const listHistory = () => request("/history", { auth: true });
+export const deleteHistory = (id) => request(`/history/${id}`, { method: "DELETE", auth: true });

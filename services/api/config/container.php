@@ -8,6 +8,8 @@ use FinPulse\Application\Alert\CreateAlert;
 use FinPulse\Application\Ask\AskQuestion;
 use FinPulse\Application\Auth\LoginUser;
 use FinPulse\Application\Auth\RegisterUser;
+use FinPulse\Application\History\DeleteHistory;
+use FinPulse\Application\History\ListHistory;
 use FinPulse\Application\Port\AlertThrottle;
 use FinPulse\Application\Port\AnswerWriter;
 use FinPulse\Application\Port\IndicatorDataProvider;
@@ -145,6 +147,10 @@ return static function (ContainerBuilder $builder): void {
             => new RegisterUser($c->get(UserRepository::class)),
         LoginUser::class => static fn (ContainerInterface $c)
             => new LoginUser($c->get(UserRepository::class), $c->get(TokenIssuer::class)),
+        ListHistory::class => static fn (ContainerInterface $c)
+            => new ListHistory($c->get(QueryLogRepository::class)),
+        DeleteHistory::class => static fn (ContainerInterface $c)
+            => new DeleteHistory($c->get(QueryLogRepository::class)),
         CreateAlert::class => static fn (ContainerInterface $c)
             => new CreateAlert($c->get(AlertRepository::class)),
         CheckAlerts::class => static fn (ContainerInterface $c) => new CheckAlerts(

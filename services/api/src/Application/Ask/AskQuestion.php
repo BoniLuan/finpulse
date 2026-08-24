@@ -31,7 +31,7 @@ final class AskQuestion
     ) {
     }
 
-    public function handle(string $question): AskResult
+    public function handle(string $question, ?string $userId = null): AskResult
     {
         $intent = $this->intentParser->parse($question);
 
@@ -42,9 +42,9 @@ final class AskQuestion
         };
 
         $answer = $this->answerWriter->write($intent, $result);
-        $this->queryLog->log($question, $intent->type, $result);
+        $id = $this->queryLog->log($question, $intent->type, $result, $answer, $sources, $userId);
 
-        return new AskResult($answer, $result, $sources);
+        return new AskResult($id, $answer, $result, $sources);
     }
 
     /** @return array{0: array<string,mixed>, 1: list<array<string,mixed>>} */

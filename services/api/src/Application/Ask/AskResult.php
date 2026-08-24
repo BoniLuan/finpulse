@@ -11,6 +11,7 @@ final class AskResult
      * @param list<array<string, mixed>>      $sources
      */
     public function __construct(
+        public readonly string $id,
         public readonly string $answer,
         public readonly array $data,
         public readonly array $sources,
@@ -21,6 +22,7 @@ final class AskResult
     public function toArray(): array
     {
         return [
+            'id' => $this->id,
             'answer' => $this->answer,
             'data' => $this->data,
             'sources' => $this->sources,

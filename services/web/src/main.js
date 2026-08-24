@@ -8,7 +8,11 @@ import {
   listAlerts,
   createAlert,
   deleteAlert,
+  listHistory,
+  deleteHistory,
 } from "./api.js";
+
+const SESSION_HISTORY_KEY = "finpulse_session_history";
 
 const INDICATOR_OPTIONS = ["selic", "cdi", "ipca", "usd", "poupanca"];
 
@@ -79,6 +83,7 @@ function wireChat() {
     button.disabled = true;
     try {
       const res = await ask(question);
+      if (!token.get()) saveSessionHistory({ ...res, question, created_at: new Date().toISOString() });
       const src = res.sources?.[0];
       answer.innerHTML =
         `<p>${res.answer}</p>` +
@@ -97,6 +102,60 @@ function wireChat() {
   });
 
   renderChips((q) => { input.value = q; submit(q); });
+}
+
+function sessionHistory() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_HISTORY_KEY) || "[]"); }
+  catch { return []; }
+}
+
+function saveSessionHistory(row) {
+  const rows = sessionHistory();
+  rows.unshift(row);
+  sessionStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(rows));
+}
+
+function renderHistoryPanel(loggedIn) {
+  const panel = $("history-panel");
+  panel.innerHTML = `<div class="history-gate"><p>${loggedIn ? "Your saved conversations are available on this account." : "Questions from this browser session stay only in this tab."}</p>` +
+    `<button id="show-history" class="ghost">Show history</button></div>`;
+  $("show-history").addEventListener("click", () => loadHistory(loggedIn));
+}
+
+async function loadHistory(loggedIn) {
+  const panel = $("history-panel");
+  panel.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+  try {
+    const rows = loggedIn ? (await listHistory()).history : sessionHistory();
+    if (!rows.length) {
+      panel.innerHTML = `<p class="history-empty">No conversations yet.</p>`;
+      return;
+    }
+    const list = document.createElement("ol");
+    list.className = "history-list";
+    for (const row of rows) {
+      const item = document.createElement("li");
+      const text = document.createElement("div");
+      const question = document.createElement("strong");
+      const answerText = document.createElement("p");
+      question.textContent = row.question;
+      answerText.textContent = row.answer;
+      text.append(question, answerText);
+      const del = document.createElement("button");
+      del.className = "ghost";
+      del.textContent = "Delete";
+      del.addEventListener("click", async () => {
+        if (loggedIn) await deleteHistory(row.id);
+        else sessionStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(sessionHistory().filter((entry) => entry.id !== row.id)));
+        loadHistory(loggedIn);
+      });
+      item.append(text, del);
+      list.appendChild(item);
+    }
+    panel.replaceChildren(list);
+  } catch (err) {
+    panel.textContent = err.message;
+  }
 }
 
 // ── small DOM/validation helpers ────────────────────────────────────────────
@@ -270,9 +329,11 @@ function renderAlertsPanel(loggedIn) {
     `<select id="al-op"><option value=">">&gt;</option><option value="<">&lt;</option></select>` +
     `<input id="al-threshold" type="number" step="0.01" placeholder="threshold" />` +
     `<button type="submit">Add alert</button></form>` +
+    `<div id="alert-history-gate" class="history-gate"><p>Previous alerts are hidden when a session starts.</p>` +
+    `<button id="show-alerts" type="button" class="ghost">Show my alerts</button></div>` +
     `<ul id="alert-list" class="alert-list"></ul>`;
   $("alert-form").addEventListener("submit", onCreateAlert);
-  loadAlerts();
+  $("show-alerts").addEventListener("click", loadAlerts);
 }
 
 async function onCreateAlert(e) {
@@ -297,6 +358,8 @@ async function onCreateAlert(e) {
 async function loadAlerts() {
   const list = $("alert-list");
   if (!list) return;
+  const gate = $("alert-history-gate");
+  if (gate) gate.remove();
   try {
     const { alerts } = await listAlerts();
     if (!alerts.length) {
@@ -323,16 +386,19 @@ async function refreshAuthUI() {
   if (!token.get()) {
     renderAuthControls(null);
     renderAlertsPanel(false);
+    renderHistoryPanel(false);
     return;
   }
   try {
     const user = await me();
     renderAuthControls(user);
     renderAlertsPanel(true);
+    renderHistoryPanel(true);
   } catch {
     token.clear();
     renderAuthControls(null);
     renderAlertsPanel(false);
+    renderHistoryPanel(false);
   }
 }
 

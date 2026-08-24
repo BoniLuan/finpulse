@@ -32,7 +32,7 @@ orchestration; Python owns AI; the frontend is thin.**
 | `api` | PHP 8.3 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
 | `web` | static HTML/CSS/JS (ES modules, no build) | Landing page, live indicators widget, chat box. |
-| `db` | PostgreSQL 16 | Users, alerts, query logs. |
+| `db` | PostgreSQL 16 | Users, alerts, and authenticated conversation history/query logs. |
 | `redis` | Redis 7 | BACEN series cache, simple job queue, rate-limit counters. |
 
 ## Clean architecture in `api`
@@ -59,7 +59,14 @@ interfaces declared by `Domain`/`Application`; the DI container wires them in
 5. A `Domain` service computes the result
    (`InvestmentCalculator` / `InflationCorrector`).
 6. Use case calls `ai-worker` `POST /infer/explain` → plain-language answer.
-7. A `query_logs` row is persisted; the API returns `{ answer, data, sources }`.
+7. With an optional valid JWT, a `query_logs` row is persisted and attached to
+   that user as conversation history. Anonymous questions are not persisted by
+   the API. The API returns `{ id, answer, data, sources }`.
+
+The static web client stores anonymous conversation history in
+`sessionStorage`. Authenticated history is read and deleted through user-scoped
+API routes. Previous history and alerts are collapsed at the start of each UI
+session and loaded only after an explicit user action.
 
 ## Alerts
 

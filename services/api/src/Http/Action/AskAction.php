@@ -6,6 +6,7 @@ namespace FinPulse\Http\Action;
 
 use FinPulse\Application\Ask\AskQuestion;
 use FinPulse\Http\JsonResponder;
+use FinPulse\Http\Middleware\JwtAuthMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -28,7 +29,8 @@ final class AskAction
             ], 422);
         }
 
-        $result = $this->askQuestion->handle($question);
+        $userId = $request->getAttribute(JwtAuthMiddleware::USER_ATTR);
+        $result = $this->askQuestion->handle($question, is_string($userId) ? $userId : null);
 
         return $this->json($response, $result->toArray());
     }

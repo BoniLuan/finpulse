@@ -70,6 +70,10 @@ Check items off as they land. Add new items here before starting them.
 - [ ] OpenAPI spec + Swagger UI; generate `api.md` from it.
 - [ ] Observability profile: Prometheus + Grafana (`docker compose --profile observability`).
 - [ ] End-to-end test (spin the stack, hit `/ask`, assert).
+- [x] Conversation history: session-only for guests, persistent for authenticated users, with row deletion.
+- [x] Progressive account panels: do not load previous alerts or history until requested.
+- [ ] Persistent light/dark theme switch.
+- [ ] More free live indicators, including cryptocurrency prices.
 
 ## Conventions quick-reference
 

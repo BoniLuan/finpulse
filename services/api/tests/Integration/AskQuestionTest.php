@@ -90,9 +90,25 @@ final class FakeAnswerWriter implements AnswerWriter
 
 final class FakeQueryLog implements QueryLogRepository
 {
-    /** @param array<string, mixed> $data */
-    public function log(string $question, string $intentType, array $data): void
+    public function log(
+        string $question,
+        string $intentType,
+        array $data,
+        string $answer,
+        array $sources,
+        ?string $userId,
+    ): string
     {
-        // no-op
+        return 'query-1';
+    }
+
+    public function findByUser(string $userId): array
+    {
+        return [];
+    }
+
+    public function deleteForUser(string $id, string $userId): bool
+    {
+        return false;
     }
 }
