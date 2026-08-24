@@ -75,7 +75,8 @@ Check items off as they land. Add new items here before starting them.
 - [x] Persistent light/dark theme switch.
 - [x] More free live indicators: cached BTC/BRL and ETH/BRL spot prices.
 - [x] Responsive dashboard refresh: wider desktop layout, contextual side rail,
-      mobile indicator carousel, and generated market artwork.
+      mobile indicator carousel, continuous generated market artwork, and a
+      rotating question-suggestion carousel.
 
 ## Conventions quick-reference
 

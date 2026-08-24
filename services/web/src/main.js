@@ -51,6 +51,11 @@ const SUGGESTIONS = [
   "How much does 10 thousand in savings yield in 1 year?",
   "What is the current Selic?",
   "How much is 1000 worth adjusted for inflation over 12 months?",
+  "How much would R$ 5,000 earn in a CDB at 110% of CDI?",
+  "How much does R$ 8,000 in Tesouro Selic yield over 18 months?",
+  "What is the current dollar exchange rate?",
+  "How has inflation affected R$ 2,500 over the last year?",
+  "What is the current CDI rate?",
 ];
 
 async function loadIndicators() {
@@ -84,13 +89,41 @@ async function loadIndicators() {
 
 function renderChips(onPick) {
   const el = document.getElementById("chips");
+  el.innerHTML =
+    `<div class="suggestions-head"><span>Try a question</span><div class="suggestion-controls">` +
+    `<button type="button" class="ghost" id="suggestion-prev" aria-label="Previous suggestions">←</button>` +
+    `<button type="button" class="ghost" id="suggestion-next" aria-label="Next suggestions">→</button>` +
+    `</div></div><div class="suggestion-viewport"><div class="suggestion-track"></div></div>`;
+  const viewport = el.querySelector(".suggestion-viewport");
+  const track = el.querySelector(".suggestion-track");
   for (const q of SUGGESTIONS) {
     const chip = document.createElement("button");
     chip.type = "button";
-    chip.className = "chip";
+    chip.className = "chip suggestion-card";
     chip.textContent = q;
     chip.addEventListener("click", () => onPick(q));
-    el.appendChild(chip);
+    track.appendChild(chip);
+  }
+
+  const move = (direction) => {
+    const distance = Math.max(viewport.clientWidth * 0.82, 240);
+    const atEnd = viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 8;
+    const atStart = viewport.scrollLeft <= 8;
+    if (direction > 0 && atEnd) viewport.scrollTo({ left: 0, behavior: "smooth" });
+    else if (direction < 0 && atStart) viewport.scrollTo({ left: viewport.scrollWidth, behavior: "smooth" });
+    else viewport.scrollBy({ left: distance * direction, behavior: "smooth" });
+  };
+  $("suggestion-prev").addEventListener("click", () => move(-1));
+  $("suggestion-next").addEventListener("click", () => move(1));
+
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let timer = setInterval(() => move(1), 6500);
+    const pause = () => clearInterval(timer);
+    const resume = () => { clearInterval(timer); timer = setInterval(() => move(1), 6500); };
+    el.addEventListener("mouseenter", pause);
+    el.addEventListener("mouseleave", resume);
+    el.addEventListener("focusin", pause);
+    el.addEventListener("focusout", resume);
   }
 }
 

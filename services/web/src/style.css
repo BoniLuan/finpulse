@@ -346,17 +346,18 @@ footer a:hover { text-decoration: underline; }
 
 /* ── Spacious dashboard layout and generated visual assets ────────────── */
 [hidden] { display: none !important; }
-body { position: relative; overflow-x: hidden; }
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background: url("/assets/ambient-flow.png") center / cover no-repeat;
-  opacity: 0.035;
-  pointer-events: none;
+body {
+  position: relative;
+  overflow-x: hidden;
+  background:
+    linear-gradient(rgba(247, 249, 252, 0.88), rgba(247, 249, 252, 0.94)),
+    url("/assets/page-background.png") center top / cover fixed no-repeat;
 }
-:root[data-theme="dark"] body::before { opacity: 0.22; }
+:root[data-theme="dark"] body {
+  background:
+    linear-gradient(rgba(5, 10, 25, 0.38), rgba(5, 10, 25, 0.62)),
+    url("/assets/page-background.png") center top / cover fixed no-repeat;
+}
 
 .topbar { padding-inline: max(1.25rem, calc((100vw - 1240px) / 2)); }
 .hero {
@@ -368,7 +369,7 @@ body::before {
   text-align: left;
   padding: 4.5rem max(1.25rem, calc((100vw - 1240px) / 2));
   overflow: hidden;
-  background: #080e22 url("/assets/ambient-flow.png") center / cover no-repeat;
+  background: transparent;
 }
 .hero::after {
   content: "";
@@ -418,17 +419,8 @@ main.dashboard {
   gap: 2rem;
 }
 main.dashboard::before {
-  content: "";
-  position: absolute;
-  inset: 16rem -12rem auto 35%;
-  height: 32rem;
-  z-index: -1;
-  background: url("/assets/ambient-flow.png") center / cover no-repeat;
-  opacity: 0.045;
-  mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 75%, transparent);
-  pointer-events: none;
+  display: none;
 }
-:root[data-theme="dark"] main.dashboard::before { opacity: 0.16; }
 .indicators { grid-column: 1 / -1; }
 .chat { grid-column: 1 / span 8; }
 .dashboard.no-context .chat { grid-column: 1 / -1; }
@@ -442,6 +434,25 @@ main.dashboard::before {
 .card { min-width: 0; overflow: hidden; }
 .card-value { font-size: clamp(1.35rem, 2vw, 1.75rem); white-space: nowrap; }
 .panel { backdrop-filter: blur(12px); background: color-mix(in srgb, var(--card) 94%, transparent); }
+.chips { display: block; margin-top: 1.15rem; }
+.suggestions-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; }
+.suggestions-head > span { color: var(--muted); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+.suggestion-controls { display: flex; gap: 0.35rem; }
+.suggestion-controls button { width: 2rem; height: 2rem; padding: 0; border-radius: 9px; }
+.suggestion-viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.suggestion-viewport::-webkit-scrollbar { display: none; }
+.suggestion-track { display: flex; gap: 0.55rem; }
+.suggestion-card {
+  flex: 0 0 calc(50% - 0.3rem);
+  min-height: 4.2rem;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.35;
+  scroll-snap-align: start;
+  border-radius: 12px;
+}
 .context-rail .panel { padding: 1.1rem; }
 .context-rail .alert-form { display: grid; grid-template-columns: 1fr 4rem; }
 .context-rail .alert-form input,
@@ -466,6 +477,7 @@ main.dashboard::before {
   }
   .cards::-webkit-scrollbar { display: none; }
   .card { flex: 0 0 72vw; scroll-snap-align: start; }
+  .suggestion-card { flex-basis: 86%; }
   .context-rail { margin-top: 2rem; }
   #ask-form { flex-direction: column; }
 }
