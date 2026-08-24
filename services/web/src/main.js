@@ -120,6 +120,7 @@ function wireChat() {
       const res = await ask(question);
       if (!token.get()) saveSessionHistory({ ...res, question, created_at: new Date().toISOString() });
       showAnswer(res);
+      await renderHistoryPanel(Boolean(token.get()));
     } catch (err) {
       const message = document.createElement("p");
       message.textContent = `Sorry — ${err.message}`;
@@ -149,20 +150,34 @@ function saveSessionHistory(row) {
   sessionStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(rows));
 }
 
-function renderHistoryPanel(loggedIn) {
-  const panel = $("history-panel");
-  panel.innerHTML = `<div class="history-gate"><p>${loggedIn ? "Your saved conversations are available on this account." : "Questions from this browser session stay only in this tab."}</p>` +
-    `<button id="show-history" class="ghost">Show history</button></div>`;
-  $("show-history").addEventListener("click", () => loadHistory(loggedIn));
+function syncContextRail() {
+  const rail = $("context-rail");
+  const visible = !$("history-section").hidden || !$("alerts-section").hidden;
+  rail.hidden = !visible;
+  $("assistant").classList.toggle("no-context", !visible);
 }
 
-async function loadHistory(loggedIn) {
+async function renderHistoryPanel(loggedIn) {
+  const panel = $("history-panel");
+  let rows = [];
+  try { rows = loggedIn ? (await listHistory()).history : sessionHistory(); }
+  catch { rows = []; }
+  $("history-section").hidden = rows.length === 0;
+  syncContextRail();
+  if (!rows.length) return;
+  panel.innerHTML = `<div class="history-gate"><p>${loggedIn ? "Your saved conversations are available on this account." : "Questions from this browser session stay only in this tab."}</p>` +
+    `<button id="show-history" class="ghost">Show history</button></div>`;
+  $("show-history").addEventListener("click", () => loadHistory(loggedIn, rows));
+}
+
+async function loadHistory(loggedIn, knownRows = null) {
   const panel = $("history-panel");
   panel.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
   try {
-    const rows = loggedIn ? (await listHistory()).history : sessionHistory();
+    const rows = knownRows ?? (loggedIn ? (await listHistory()).history : sessionHistory());
     if (!rows.length) {
-      panel.innerHTML = `<p class="history-empty">No conversations yet.</p>`;
+      $("history-section").hidden = true;
+      syncContextRail();
       return;
     }
     const list = document.createElement("ol");
@@ -351,12 +366,13 @@ function renderAuthControls(user) {
 function renderAlertsPanel(loggedIn) {
   const el = $("alerts-panel");
   if (!loggedIn) {
-    el.innerHTML =
-      `<div class="empty-cta"><p>Log in to create price alerts for Selic, USD, IPCA and more.</p>` +
-      `<button id="alerts-login">Log in or sign up</button></div>`;
-    $("alerts-login").addEventListener("click", () => openAuthModal("login"));
+    $("alerts-section").hidden = true;
+    el.replaceChildren();
+    syncContextRail();
     return;
   }
+  $("alerts-section").hidden = false;
+  syncContextRail();
   el.innerHTML =
     `<form id="alert-form" class="alert-form">` +
     `<select id="al-indicator">${INDICATOR_OPTIONS.map((i) => `<option>${i}</option>`).join("")}</select>` +
@@ -420,19 +436,19 @@ async function refreshAuthUI() {
   if (!token.get()) {
     renderAuthControls(null);
     renderAlertsPanel(false);
-    renderHistoryPanel(false);
+    await renderHistoryPanel(false);
     return;
   }
   try {
     const user = await me();
     renderAuthControls(user);
     renderAlertsPanel(true);
-    renderHistoryPanel(true);
+    await renderHistoryPanel(true);
   } catch {
     token.clear();
     renderAuthControls(null);
     renderAlertsPanel(false);
-    renderHistoryPanel(false);
+    await renderHistoryPanel(false);
   }
 }
 

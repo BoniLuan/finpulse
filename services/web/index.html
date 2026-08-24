@@ -16,20 +16,26 @@
     </nav>
 
     <header class="hero">
-      <span class="badge">✨ Real Central Bank data + AI</span>
-      <h1>FinPulse</h1>
-      <p>Ask anything about Brazilian finance and get a clear, AI-explained
-         answer backed by live BACEN data.</p>
+      <div class="hero-content">
+        <span class="badge">✨ Real market data + AI</span>
+        <h1>Make financial data<br /><span>feel simple.</span></h1>
+        <p>Ask about Brazilian finance and get a clear explanation backed by
+           live BACEN and crypto market data.</p>
+        <a class="hero-action" href="#assistant">Start exploring <span aria-hidden="true">↓</span></a>
+      </div>
     </header>
 
-    <main>
+    <main id="assistant" class="dashboard no-context">
       <section class="indicators">
-        <h2>Live indicators</h2>
+        <div class="section-heading">
+          <div><span class="eyebrow">Markets</span><h2>Live indicators</h2></div>
+          <span class="live-status"><i></i> Live data</span>
+        </div>
         <div id="indicators" class="cards"></div>
       </section>
 
       <section class="chat">
-        <h2>Ask something</h2>
+        <div class="section-heading"><div><span class="eyebrow">Assistant</span><h2>Ask something</h2></div></div>
         <div class="panel">
           <form id="ask-form">
             <input id="question" type="text" autocomplete="off"
@@ -41,15 +47,17 @@
         </div>
       </section>
 
-      <section class="history">
-        <h2>Conversation history</h2>
-        <div id="history-panel" class="panel"></div>
-      </section>
+      <aside id="context-rail" class="context-rail" hidden>
+        <section id="history-section" class="history" hidden>
+          <div class="section-heading"><div><span class="eyebrow">Recent</span><h2>Conversation history</h2></div></div>
+          <div id="history-panel" class="panel"></div>
+        </section>
 
-      <section class="alerts">
-        <h2>My alerts</h2>
-        <div id="alerts-panel" class="panel"></div>
-      </section>
+        <section id="alerts-section" class="alerts" hidden>
+          <div class="section-heading"><div><span class="eyebrow">Tracking</span><h2>My alerts</h2></div></div>
+          <div id="alerts-panel" class="panel"></div>
+        </section>
+      </aside>
     </main>
 
     <footer>

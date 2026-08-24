@@ -74,6 +74,8 @@ Check items off as they land. Add new items here before starting them.
 - [x] Progressive account panels: do not load previous alerts or history until requested.
 - [x] Persistent light/dark theme switch.
 - [x] More free live indicators: cached BTC/BRL and ETH/BRL spot prices.
+- [x] Responsive dashboard refresh: wider desktop layout, contextual side rail,
+      mobile indicator carousel, and generated market artwork.
 
 ## Conventions quick-reference
 

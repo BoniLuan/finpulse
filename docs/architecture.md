@@ -31,7 +31,7 @@ orchestration; Python owns AI; the frontend is thin.**
 | `gateway` | Nginx | Single public entry; routes `/api`, `/ai` (internal), `/` to web. |
 | `api` | PHP 8.3 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
-| `web` | static HTML/CSS/JS (ES modules, no build) | Landing page, live indicators widget, chat box. |
+| `web` | static HTML/CSS/JS (ES modules, no build) | Responsive dashboard, live indicator carousel, chat, contextual history/alerts, and theme-aware visual assets. |
 | `db` | PostgreSQL 16 | Users, alerts, and authenticated conversation history/query logs. |
 | `redis` | Redis 7 | BACEN series cache, simple job queue, rate-limit counters. |
 
