@@ -10,8 +10,10 @@ use FinPulse\Application\Auth\LoginUser;
 use FinPulse\Application\Auth\RegisterUser;
 use FinPulse\Application\History\DeleteHistory;
 use FinPulse\Application\History\ListHistory;
+use FinPulse\Application\Indicator\ListIndicators;
 use FinPulse\Application\Port\AlertThrottle;
 use FinPulse\Application\Port\AnswerWriter;
+use FinPulse\Application\Port\CryptoPriceProvider;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\IntentParser;
 use FinPulse\Application\Port\NotificationChannel;
@@ -26,6 +28,7 @@ use FinPulse\Infrastructure\Cache\RedisCache;
 use FinPulse\Infrastructure\Channel\EmailChannel;
 use FinPulse\Infrastructure\Channel\LogChannel;
 use FinPulse\Infrastructure\Channel\WhatsAppChannel;
+use FinPulse\Infrastructure\Market\CoinbasePriceClient;
 use FinPulse\Infrastructure\Notification\RedisAlertThrottle;
 use FinPulse\Infrastructure\Persistence\PdoAlertRepository;
 use FinPulse\Infrastructure\Persistence\PdoQueryLogRepository;
@@ -87,6 +90,12 @@ return static function (ContainerBuilder $builder): void {
             $c->get(RedisCache::class),
             $settings['bacen']['base_url'],
             $settings['bacen']['cache_ttl'],
+        ),
+        CryptoPriceProvider::class => static fn (ContainerInterface $c) => new CoinbasePriceClient(
+            $c->get(ClientInterface::class),
+            $c->get(RedisCache::class),
+            $settings['crypto']['base_url'],
+            $settings['crypto']['cache_ttl'],
         ),
 
         // AiWorkerClient implements both AI ports.
@@ -151,6 +160,8 @@ return static function (ContainerBuilder $builder): void {
             => new ListHistory($c->get(QueryLogRepository::class)),
         DeleteHistory::class => static fn (ContainerInterface $c)
             => new DeleteHistory($c->get(QueryLogRepository::class)),
+        ListIndicators::class => static fn (ContainerInterface $c)
+            => new ListIndicators($c->get(IndicatorDataProvider::class), $c->get(CryptoPriceProvider::class)),
         CreateAlert::class => static fn (ContainerInterface $c)
             => new CreateAlert($c->get(AlertRepository::class)),
         CheckAlerts::class => static fn (ContainerInterface $c) => new CheckAlerts(

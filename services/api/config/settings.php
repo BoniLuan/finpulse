@@ -28,6 +28,10 @@ return [
         'base_url' => $_ENV['BACEN_BASE_URL'] ?? 'https://api.bcb.gov.br',
         'cache_ttl' => (int) ($_ENV['BACEN_CACHE_TTL'] ?? 3600),
     ],
+    'crypto' => [
+        'base_url' => $_ENV['COINBASE_BASE_URL'] ?? 'https://api.coinbase.com',
+        'cache_ttl' => (int) ($_ENV['CRYPTO_CACHE_TTL'] ?? 60),
+    ],
     'alerts' => [
         'cooldown' => (int) ($_ENV['ALERTS_COOLDOWN'] ?? 3600),
     ],

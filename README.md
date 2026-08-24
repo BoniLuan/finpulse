@@ -82,7 +82,8 @@ credentials**.
 This repository contains a working vertical slice for questions, auth and
 user-scoped alerts. Alerts are evaluated automatically and can be delivered to
 the application log, SMTP email (Mailpit by default), or the Meta WhatsApp Cloud
-API. Planned next:
+API. The dashboard also includes cached BTC/BRL and ETH/BRL spot prices from
+Coinbase's public Data API. Planned next:
 
 - Prometheus + Grafana observability (`--profile observability`)
 - OpenAPI spec + Swagger UI

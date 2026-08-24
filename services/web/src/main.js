@@ -42,8 +42,10 @@ const DISPLAY = {
   selic: { icon: "📈", caption: "annual target", fmt: (v) => `${v}%` },
   ipca: { icon: "🛒", caption: "monthly inflation", fmt: (v) => `${v}%` },
   usd: { icon: "💵", caption: "PTAX buy", fmt: (v) => `R$ ${v}` },
+  btc: { icon: "₿", caption: "spot price in BRL", fmt: (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
+  eth: { icon: "◆", caption: "spot price in BRL", fmt: (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
 };
-const SHOWN = ["selic", "ipca", "usd"];
+const SHOWN = ["selic", "ipca", "usd", "btc", "eth"];
 
 const SUGGESTIONS = [
   "How much does 10 thousand in savings yield in 1 year?",

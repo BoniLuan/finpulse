@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FinPulse\Tests\Integration;
 
 use FinPulse\Application\Indicator\ListIndicators;
+use FinPulse\Application\Port\CryptoPriceProvider;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Domain\Finance\Indicator;
 use FinPulse\Domain\Finance\IndicatorSeries;
@@ -28,6 +29,23 @@ final class ListIndicatorsTest extends TestCase
         $result = (new ListIndicators(new StubProvider(null)))->handle();
 
         self::assertNull($result[0]['value']);
+    }
+
+    public function testIncludesCryptoSpotPricesWhenProviderIsConfigured(): void
+    {
+        $result = (new ListIndicators(new StubProvider(14.5), new StubCryptoProvider()))->handle();
+
+        self::assertSame('btc', $result[count(Indicator::cases())]['key']);
+        self::assertSame(350000.0, $result[count(Indicator::cases())]['value']);
+        self::assertNull($result[count(Indicator::cases())]['series']);
+    }
+}
+
+final class StubCryptoProvider implements CryptoPriceProvider
+{
+    public function prices(): array
+    {
+        return ['btc' => 350000.0, 'eth' => 18000.0];
     }
 }
 

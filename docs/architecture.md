@@ -68,6 +68,10 @@ The static web client stores anonymous conversation history in
 API routes. Previous history and alerts are collapsed at the start of each UI
 session and loaded only after an explicit user action.
 
+The live-indicators use case combines BACEN SGS economic series with BTC/BRL
+and ETH/BRL spot prices from Coinbase's unauthenticated public Data API. Crypto
+responses are cached in Redis for `CRYPTO_CACHE_TTL` seconds.
+
 ## Alerts
 
 `POST /api/v1/alerts` (JWT) persists a user-scoped alert. The **`scheduler`**

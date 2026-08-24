@@ -99,7 +99,7 @@ h2 {
 }
 
 /* ── Indicator cards ──────────────────────────────────────────────────── */
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.9rem; }
 .card {
   background: var(--card);
   border: 1px solid var(--line);

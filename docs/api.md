@@ -23,8 +23,10 @@ GET /api/v1/health        → 200 { "status": "ok", "service": "api" }
 GET /api/v1/indicators
 ```
 
-Returns the latest value of every supported indicator (a failing series yields
-`value: null` rather than an error). Used by the web indicators widget.
+Returns the latest value of every supported indicator (a failing source yields
+`value: null` rather than an error). BACEN supplies economic series; Coinbase's
+public spot-price API supplies cached BTC/BRL and ETH/BRL values. Used by the web
+indicators widget.
 
 ```json
 {

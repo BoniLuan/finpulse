@@ -73,7 +73,7 @@ Check items off as they land. Add new items here before starting them.
 - [x] Conversation history: session-only for guests, persistent for authenticated users, with row deletion.
 - [x] Progressive account panels: do not load previous alerts or history until requested.
 - [x] Persistent light/dark theme switch.
-- [ ] More free live indicators, including cryptocurrency prices.
+- [x] More free live indicators: cached BTC/BRL and ETH/BRL spot prices.
 
 ## Conventions quick-reference
 
