@@ -13,6 +13,14 @@ use PHPUnit\Framework\TestCase;
 
 final class UserAlertsTest extends TestCase
 {
+    public function testAlertRejectsAnUnknownChannel(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('channel must be');
+
+        new Alert('a1', 'user-1', Indicator::USD, '>', 5.0, 'unknown');
+    }
+
     public function testListReturnsOnlyTheUsersAlerts(): void
     {
         $repo = new InMemoryAlertRepository();

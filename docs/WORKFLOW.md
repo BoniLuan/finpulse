@@ -63,10 +63,10 @@ Check items off as they land. Add new items here before starting them.
 ### ▶ Next (suggested order)
 - [x] `GET /indicators` endpoint so the web widget stops abusing `/ask`.
 - [x] More calculators (Tesouro Selic, CDB %CDI) + their unit tests.
-- [ ] Real `WhatsAppChannel` (Meta Cloud API) — implement the stub, add an ADR.
+- [x] Notification channels: `email` (SMTP/Mailpit) + `whatsapp` (Meta Cloud API) (ADR 0006).
+- [x] Alerts scheduler (`scheduler` service) + Redis cooldown so alerts fire automatically.
 - [x] Gemini provider (`google-genai`, schema JSON) — implemented (ADR 0005).
 - [ ] `claude` / `openai` provider adapters.
-- [ ] Alerts scheduler (cron container or queue worker) instead of manual command.
 - [ ] OpenAPI spec + Swagger UI; generate `api.md` from it.
 - [ ] Observability profile: Prometheus + Grafana (`docker compose --profile observability`).
 - [ ] End-to-end test (spin the stack, hit `/ask`, assert).

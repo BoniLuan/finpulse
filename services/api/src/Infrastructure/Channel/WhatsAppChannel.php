@@ -5,19 +5,27 @@ declare(strict_types=1);
 namespace FinPulse\Infrastructure\Channel;
 
 use FinPulse\Application\Port\NotificationChannel;
+use GuzzleHttp\ClientInterface;
 
 /**
- * WhatsApp channel — STUB.
+ * WhatsApp channel via the Meta Cloud API (Graph API).
  *
- * Implementing this is the documented next step: wire the Meta WhatsApp Cloud
- * API (or Z-API) here. The rest of the system already dispatches through the
- * NotificationChannel port, so no other code needs to change — register this
- * channel in config/container.php under the key 'whatsapp'.
+ *   POST https://graph.facebook.com/{version}/{phoneNumberId}/messages
  *
- * @see docs/architecture.md
+ * Free in development: a test sender number plus verified test recipients. Free
+ * text delivery requires an open 24h session (the recipient messages first);
+ * see docs/architecture.md. Configure WHATSAPP_* env vars to enable.
  */
 final class WhatsAppChannel implements NotificationChannel
 {
+    public function __construct(
+        private readonly ClientInterface $http,
+        private readonly string $token,
+        private readonly string $phoneNumberId,
+        private readonly string $apiVersion,
+    ) {
+    }
+
     public function name(): string
     {
         return 'whatsapp';
@@ -25,9 +33,28 @@ final class WhatsAppChannel implements NotificationChannel
 
     public function send(string $recipient, string $message): void
     {
-        throw new \RuntimeException(
-            'WhatsAppChannel is not implemented yet. '
-            . 'Wire the WhatsApp Cloud API here and register it in the container.',
+        if ($this->token === '' || $this->phoneNumberId === '') {
+            throw new \RuntimeException('WhatsApp channel is not configured (WHATSAPP_* env).');
+        }
+        if ($recipient === '') {
+            throw new \RuntimeException('WhatsApp channel: empty recipient');
+        }
+
+        $url = sprintf(
+            'https://graph.facebook.com/%s/%s/messages',
+            $this->apiVersion,
+            $this->phoneNumberId,
         );
+
+        $this->http->request('POST', $url, [
+            'headers' => ['Authorization' => 'Bearer ' . $this->token],
+            'json' => [
+                'messaging_product' => 'whatsapp',
+                'to' => $recipient,
+                'type' => 'text',
+                'text' => ['body' => $message],
+            ],
+            'timeout' => 15,
+        ]);
     }
 }

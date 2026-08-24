@@ -21,7 +21,7 @@ orchestration; Python owns AI; the frontend is thin.**
                      └────────────┘ └────────┘
                             ▲
                             │ scheduled command (cron-style worker)
-                   bin/console alerts:check  → Channel (web/log now, WhatsApp later)
+                   bin/console alerts:check  → Channel (log/email/WhatsApp)
 ```
 
 ## Services
@@ -63,10 +63,13 @@ interfaces declared by `Domain`/`Application`; the DI container wires them in
 
 ## Alerts
 
-`POST /api/v1/alerts` (JWT) persists an alert. `php bin/console alerts:check`
-(cron-style) evaluates alerts against live data and dispatches notifications
-through a `Channel`. Today only `LogChannel` is wired; a `WhatsAppChannel`
-implementing the same interface is the documented next step.
+`POST /api/v1/alerts` (JWT) persists a user-scoped alert. The **`scheduler`**
+service runs `php bin/console alerts:check` every `ALERTS_INTERVAL` seconds; it
+evaluates each alert against live data and, when triggered, dispatches through a
+`NotificationChannel` — `log`, **`email`** (SMTP / Mailpit), or **`whatsapp`**
+(Meta Cloud API). A Redis-backed `AlertThrottle` mutes a fired alert for
+`ALERTS_COOLDOWN` seconds to prevent re-notifying every cycle. See
+[ADR 0006](adr/0006-notification-channels-and-scheduler.md).
 
 ## Why these choices
 
@@ -76,3 +79,4 @@ See the ADRs:
 - [0003 — Pluggable LLM provider](adr/0003-pluggable-llm-provider.md)
 - [0004 — Static frontend, no build tooling](adr/0004-static-frontend-no-build.md)
 - [0005 — Gemini via the google-genai SDK with schema JSON](adr/0005-gemini-genai-sdk.md)
+- [0006 — Notification channels and the alerts scheduler](adr/0006-notification-channels-and-scheduler.md)

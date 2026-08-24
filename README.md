@@ -79,14 +79,14 @@ credentials**.
 
 ## Status & roadmap
 
-This repository currently contains the **full structure plus one working
-vertical slice** (ask a question end-to-end + auth + one alert). It is designed
-to grow. Planned next:
+This repository contains a working vertical slice for questions, auth and
+user-scoped alerts. Alerts are evaluated automatically and can be delivered to
+the application log, SMTP email (Mailpit by default), or the Meta WhatsApp Cloud
+API. Planned next:
 
-- Real WhatsApp Cloud API channel (interface already in place)
 - Prometheus + Grafana observability (`--profile observability`)
-- More indicators and calculators
 - OpenAPI spec + Swagger UI
+- End-to-end stack test
 - Additional LLM provider adapters (Claude, OpenAI)
 
 ---

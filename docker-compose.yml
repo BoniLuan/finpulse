@@ -1,5 +1,33 @@
 name: finpulse
 
+# Shared environment for the PHP services (api + scheduler).
+x-api-env: &api-env
+  APP_ENV: ${APP_ENV:-dev}
+  APP_DEBUG: ${APP_DEBUG:-true}
+  DATABASE_DSN: ${DATABASE_DSN}
+  DATABASE_USER: ${DATABASE_USER}
+  DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+  REDIS_URL: ${REDIS_URL}
+  JWT_SECRET: ${JWT_SECRET}
+  JWT_TTL: ${JWT_TTL:-3600}
+  RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
+  RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60}
+  AI_WORKER_URL: ${AI_WORKER_URL:-http://ai-worker:8000}
+  BACEN_BASE_URL: ${BACEN_BASE_URL:-https://api.bcb.gov.br}
+  BACEN_CACHE_TTL: ${BACEN_CACHE_TTL:-3600}
+  ALERTS_INTERVAL: ${ALERTS_INTERVAL:-300}
+  ALERTS_COOLDOWN: ${ALERTS_COOLDOWN:-3600}
+  MAIL_HOST: ${MAIL_HOST:-mailpit}
+  MAIL_PORT: ${MAIL_PORT:-1025}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-}
+  MAIL_FROM: ${MAIL_FROM:-alerts@finpulse.dev}
+  WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+  WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+  WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v21.0}
+  WHATSAPP_RECIPIENT: ${WHATSAPP_RECIPIENT:-}
+
 services:
   gateway:
     build: ./infra/gateway
@@ -12,20 +40,7 @@ services:
 
   api:
     build: ./services/api
-    environment:
-      APP_ENV: ${APP_ENV:-dev}
-      APP_DEBUG: ${APP_DEBUG:-true}
-      DATABASE_DSN: ${DATABASE_DSN}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      REDIS_URL: ${REDIS_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_TTL: ${JWT_TTL:-3600}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
-      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60}
-      AI_WORKER_URL: ${AI_WORKER_URL:-http://ai-worker:8000}
-      BACEN_BASE_URL: ${BACEN_BASE_URL:-https://api.bcb.gov.br}
-      BACEN_CACHE_TTL: ${BACEN_CACHE_TTL:-3600}
+    environment: *api-env
     depends_on:
       db:
         condition: service_healthy
@@ -35,11 +50,23 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  # Runs alerts:check on an interval so stored alerts fire automatically.
+  scheduler:
+    build: ./services/api
+    command: sh -c 'while true; do php bin/console alerts:check; sleep "$${ALERTS_INTERVAL:-300}"; done'
+    environment: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
   ai-worker:
     build: ./services/ai-worker
     environment:
       LLM_PROVIDER: ${LLM_PROVIDER:-fake}
-      LLM_MODEL: ${LLM_MODEL:-gemini-1.5-flash}
+      LLM_MODEL: ${LLM_MODEL:-gemini-2.5-flash}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
@@ -66,6 +93,11 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
+
+  # Local SMTP sink — captures alert emails; web UI exposed in dev (see override).
+  mailpit:
+    image: axllent/mailpit:latest
     restart: unless-stopped
 
 volumes:

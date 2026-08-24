@@ -87,4 +87,8 @@ POST   /api/v1/alerts            { "indicator": "usd", "operator": ">", "thresho
 DELETE /api/v1/alerts/{id}       → 204 on success, 404 if not found / not owned
 ```
 
-Stored alerts are evaluated by `php bin/console alerts:check`.
+`channel` is one of `log`, `email`, or `whatsapp`. Stored alerts are evaluated
+automatically by the `scheduler` service (which runs `php bin/console
+alerts:check` on an interval) and dispatched through that channel, with a
+per-alert cooldown to avoid repeat notifications. An unsupported channel is
+rejected with `400`.

@@ -14,10 +14,13 @@ final class Alert
         public readonly Indicator $indicator,
         public readonly string $operator, // '>' or '<'
         public readonly float $threshold,
-        public readonly string $channel,  // 'log' | 'web' | (whatsapp: TODO)
+        public readonly string $channel,  // 'log' | 'email' | 'whatsapp'
     ) {
         if (!in_array($operator, ['>', '<'], true)) {
             throw new \InvalidArgumentException('operator must be ">" or "<"');
+        }
+        if (!in_array($channel, ['log', 'email', 'whatsapp'], true)) {
+            throw new \InvalidArgumentException('channel must be "log", "email", or "whatsapp"');
         }
     }
 

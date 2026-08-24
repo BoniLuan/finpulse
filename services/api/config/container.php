@@ -8,6 +8,7 @@ use FinPulse\Application\Alert\CreateAlert;
 use FinPulse\Application\Ask\AskQuestion;
 use FinPulse\Application\Auth\LoginUser;
 use FinPulse\Application\Auth\RegisterUser;
+use FinPulse\Application\Port\AlertThrottle;
 use FinPulse\Application\Port\AnswerWriter;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\IntentParser;
@@ -20,7 +21,10 @@ use FinPulse\Infrastructure\Ai\AiWorkerClient;
 use FinPulse\Infrastructure\Auth\JwtService;
 use FinPulse\Infrastructure\Bacen\BacenClient;
 use FinPulse\Infrastructure\Cache\RedisCache;
+use FinPulse\Infrastructure\Channel\EmailChannel;
 use FinPulse\Infrastructure\Channel\LogChannel;
+use FinPulse\Infrastructure\Channel\WhatsAppChannel;
+use FinPulse\Infrastructure\Notification\RedisAlertThrottle;
 use FinPulse\Infrastructure\Persistence\PdoAlertRepository;
 use FinPulse\Infrastructure\Persistence\PdoQueryLogRepository;
 use FinPulse\Infrastructure\Persistence\PdoUserRepository;
@@ -31,6 +35,9 @@ use Monolog\Logger;
 use Predis\Client as RedisClient;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 
 return static function (ContainerBuilder $builder): void {
     $settings = require __DIR__ . '/settings.php';
@@ -86,13 +93,44 @@ return static function (ContainerBuilder $builder): void {
         IntentParser::class => static fn (ContainerInterface $c) => $c->get(AiWorkerClient::class),
         AnswerWriter::class => static fn (ContainerInterface $c) => $c->get(AiWorkerClient::class),
 
+        // ── Email transport (SMTP) ───────────────────────────────────────
+        MailerInterface::class => static function () use ($settings): MailerInterface {
+            $encryption = strtolower($settings['mail']['encryption']);
+            if (!in_array($encryption, ['', 'tls', 'ssl'], true)) {
+                throw new \InvalidArgumentException('MAIL_ENCRYPTION must be "tls", "ssl", or empty.');
+            }
+
+            $transport = new EsmtpTransport(
+                $settings['mail']['host'],
+                $settings['mail']['port'],
+                $encryption === 'ssl',
+            );
+            $transport->setAutoTls($encryption === 'tls');
+            if ($settings['mail']['username'] !== '') {
+                $transport->setUsername($settings['mail']['username']);
+                $transport->setPassword($settings['mail']['password']);
+            }
+
+            return new Mailer($transport);
+        },
+
         // ── Notification channels (keyed by name) ────────────────────────
-        // Add 'whatsapp' => new WhatsAppChannel(...) here once implemented.
+        // Add a channel by implementing NotificationChannel and registering it here.
         'channels' => static fn (ContainerInterface $c): array => [
             'log' => new LogChannel($c->get(LoggerInterface::class)),
+            'email' => new EmailChannel($c->get(MailerInterface::class), $settings['mail']['from']),
+            'whatsapp' => new WhatsAppChannel(
+                $c->get(ClientInterface::class),
+                $settings['whatsapp']['token'],
+                $settings['whatsapp']['phone_number_id'],
+                $settings['whatsapp']['api_version'],
+            ),
         ],
         NotificationChannel::class => static fn (ContainerInterface $c)
             => new LogChannel($c->get(LoggerInterface::class)),
+
+        AlertThrottle::class => static fn (ContainerInterface $c)
+            => new RedisAlertThrottle($c->get(RedisClient::class), $settings['alerts']['cooldown']),
 
         // ── Use cases ────────────────────────────────────────────────────
         AskQuestion::class => static fn (ContainerInterface $c) => new AskQuestion(
@@ -112,7 +150,11 @@ return static function (ContainerBuilder $builder): void {
         CheckAlerts::class => static fn (ContainerInterface $c) => new CheckAlerts(
             $c->get(AlertRepository::class),
             $c->get(IndicatorDataProvider::class),
+            $c->get(UserRepository::class),
+            $c->get(AlertThrottle::class),
+            $c->get(LoggerInterface::class),
             $c->get('channels'),
+            $settings['whatsapp']['recipient'],
         ),
     ]);
 };

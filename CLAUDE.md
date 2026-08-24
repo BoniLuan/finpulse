@@ -1,7 +1,7 @@
 # FinPulse
 
 Personal finance assistant: answers financial questions and fires alerts over
-chat (web now, WhatsApp later) using **real free BACEN public data** + an AI
+log, email, or WhatsApp using **real free BACEN public data** + an AI
 layer. Portfolio project demonstrating backend architecture, Docker, DBs, auth,
 integrations, AI, tests, CI/CD and observability.
 
@@ -54,4 +54,4 @@ Dependencies point inward; Domain has no framework/IO imports.
 - BACEN integration: `services/api/src/Infrastructure/Bacen/BacenClient.php`
 - Use cases: `services/api/src/Application/`
 - LLM providers: `services/ai-worker/app/providers/`
-- Channels (WhatsApp stub): `services/api/src/Infrastructure/Channel/`
+- Notification channels: `services/api/src/Infrastructure/Channel/`
