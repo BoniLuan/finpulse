@@ -13,6 +13,27 @@ import {
 } from "./api.js";
 
 const SESSION_HISTORY_KEY = "finpulse_session_history";
+const THEME_KEY = "finpulse_theme";
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const toggle = document.getElementById("theme-toggle");
+  if (toggle) {
+    toggle.textContent = theme === "dark" ? "☀️" : "🌙";
+    toggle.title = `Switch to ${theme === "dark" ? "light" : "dark"} mode`;
+  }
+}
+
+function wireTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const initial = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  applyTheme(initial);
+  $("theme-toggle").addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+}
 
 const INDICATOR_OPTIONS = ["selic", "cdi", "ipca", "usd", "poupanca"];
 
@@ -404,6 +425,7 @@ async function refreshAuthUI() {
 
 loadIndicators();
 wireChat();
+wireTheme();
 refreshAuthUI();
 // Close the modal when clicking the backdrop.
 modal().addEventListener("click", (e) => { if (e.target === modal()) closeAuthModal(); });
