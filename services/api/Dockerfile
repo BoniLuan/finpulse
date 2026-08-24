@@ -2,8 +2,8 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock* ./
-RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --no-progress || \
-    composer update --no-dev --no-scripts --no-interaction --prefer-dist --no-progress
+RUN composer install --no-scripts --no-interaction --prefer-dist --no-progress || \
+    composer update --no-scripts --no-interaction --prefer-dist --no-progress
 
 # ── Stage 2: runtime (php-fpm) ────────────────────────────────────────────────
 FROM php:8.3-fpm-alpine
@@ -26,6 +26,7 @@ COPY docker/xdebug.ini /usr/local/etc/php/conf.d/zz-xdebug.ini
 
 WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
+COPY --from=vendor /usr/bin/composer /usr/local/bin/composer
 COPY . .
 
 # php-fpm listens on 9000; the gateway connects via FastCGI.

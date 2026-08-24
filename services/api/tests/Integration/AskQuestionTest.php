@@ -97,8 +97,7 @@ final class FakeQueryLog implements QueryLogRepository
         string $answer,
         array $sources,
         ?string $userId,
-    ): string
-    {
+    ): string {
         return 'query-1';
     }
 

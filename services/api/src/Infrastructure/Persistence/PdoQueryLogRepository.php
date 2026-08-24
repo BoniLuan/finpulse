@@ -25,8 +25,7 @@ final class PdoQueryLogRepository implements QueryLogRepository
         string $answer,
         array $sources,
         ?string $userId,
-    ): string
-    {
+    ): string {
         $id = Uuid::uuid4()->toString();
         if ($userId === null) {
             return $id;

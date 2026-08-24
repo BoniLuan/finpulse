@@ -100,6 +100,18 @@ function wireChat() {
   const button = form.querySelector("button");
   const answer = document.getElementById("answer");
 
+  function showAnswer(result) {
+    const text = document.createElement("p");
+    text.textContent = result.answer;
+    answer.replaceChildren(text);
+    const source = result.sources?.[0];
+    if (source) {
+      const citation = document.createElement("small");
+      citation.textContent = `Source: ${source.name} · series ${source.series} (${source.label})`;
+      answer.appendChild(citation);
+    }
+  }
+
   async function submit(question) {
     answer.classList.add("show");
     answer.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
@@ -107,12 +119,11 @@ function wireChat() {
     try {
       const res = await ask(question);
       if (!token.get()) saveSessionHistory({ ...res, question, created_at: new Date().toISOString() });
-      const src = res.sources?.[0];
-      answer.innerHTML =
-        `<p>${res.answer}</p>` +
-        (src ? `<small>Source: ${src.name} · series ${src.series} (${src.label})</small>` : "");
+      showAnswer(res);
     } catch (err) {
-      answer.innerHTML = `<p>Sorry — ${err.message}</p>`;
+      const message = document.createElement("p");
+      message.textContent = `Sorry — ${err.message}`;
+      answer.replaceChildren(message);
     } finally {
       button.disabled = false;
     }

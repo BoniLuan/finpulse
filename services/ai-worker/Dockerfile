@@ -5,7 +5,7 @@ WORKDIR /app
 # Install the package (with gemini extra) from pyproject.
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir ".[gemini]" || pip install --no-cache-dir fastapi "uvicorn[standard]" pydantic httpx
+    && pip install --no-cache-dir ".[gemini,dev]" || pip install --no-cache-dir fastapi "uvicorn[standard]" pydantic httpx pytest ruff mypy
 
 COPY . .
 

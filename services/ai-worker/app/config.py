@@ -13,7 +13,7 @@ class Settings:
     gemini_api_key: str
 
     @staticmethod
-    def from_env() -> "Settings":
+    def from_env() -> Settings:
         return Settings(
             provider=os.getenv("LLM_PROVIDER", "fake").lower(),
             model=os.getenv("LLM_MODEL", "gemini-1.5-flash"),
