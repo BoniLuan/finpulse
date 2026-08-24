@@ -35,6 +35,10 @@ orchestration; Python owns AI; the frontend is thin.**
 | `db` | PostgreSQL 16 | Users, alerts, and authenticated conversation history/query logs. |
 | `redis` | Redis 7 | BACEN series cache, simple job queue, rate-limit counters. |
 
+The gateway resolves `api` and `web` through Docker's embedded DNS with a short
+TTL. Rebuilding either upstream can change its container IP without requiring a
+gateway restart or causing stale-upstream `502` responses.
+
 ## Clean architecture in `api`
 
 ```
