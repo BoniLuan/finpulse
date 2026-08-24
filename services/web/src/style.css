@@ -368,14 +368,16 @@ body::before {
   text-align: left;
   padding: 4.5rem max(1.25rem, calc((100vw - 1240px) / 2));
   overflow: hidden;
-  background: #080e22 url("/assets/hero-market.png") center / cover no-repeat;
+  background: #080e22 url("/assets/ambient-flow.png") center / cover no-repeat;
 }
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(90deg, rgba(6, 11, 29, 0.96) 0%, rgba(6, 11, 29, 0.72) 44%, rgba(6, 11, 29, 0.05) 78%);
+  background:
+    linear-gradient(180deg, transparent 62%, var(--bg) 100%),
+    linear-gradient(90deg, rgba(6, 11, 29, 0.96) 0%, rgba(6, 11, 29, 0.72) 44%, rgba(6, 11, 29, 0.08) 78%);
 }
 .hero-content { width: min(40rem, 70%); }
 .hero .badge {
@@ -421,7 +423,7 @@ main.dashboard::before {
   inset: 16rem -12rem auto 35%;
   height: 32rem;
   z-index: -1;
-  background: url("/assets/dashboard-waves.png") center / cover no-repeat;
+  background: url("/assets/ambient-flow.png") center / cover no-repeat;
   opacity: 0.045;
   mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 75%, transparent);
   pointer-events: none;
