@@ -482,32 +482,44 @@ main.dashboard {
   .topbar { padding: 0.6rem var(--content-gutter); }
   .auth-controls .who { display: none; }
   .auth-controls button { padding: 0.45rem 0.7rem; font-size: 0.8rem; }
-  .hero { min-height: 19rem; padding: 2.25rem var(--content-gutter); }
+  .hero { min-height: 17.5rem; padding: 1.85rem var(--content-gutter); }
   .hero-content { width: 100%; }
-  .hero h1 { font-size: clamp(2.25rem, 11vw, 3rem); }
-  .hero p { font-size: 0.96rem; }
+  .hero h1 { font-size: clamp(2.1rem, 10.5vw, 2.75rem); margin-bottom: 0.75rem; }
+  .hero p { font-size: 0.92rem; line-height: 1.5; }
+  .hero .badge { margin-bottom: 0.8rem; }
   .hero-action { display: inline-flex; }
-  main.dashboard { display: block; width: 100%; padding: 1.1rem var(--content-gutter) 2.5rem; }
-  main.dashboard > * + * { margin-top: 1.5rem; }
+  main.dashboard { display: block; width: 100%; padding: 0.9rem var(--content-gutter) 2.25rem; }
+  main.dashboard > * + * { margin-top: 1.3rem; }
   .cards {
     display: flex;
     overflow-x: auto;
-    gap: 0.8rem;
+    gap: 0.65rem;
     margin-inline: calc(-1 * var(--content-gutter));
-    padding: 0.25rem var(--content-gutter) 1rem;
+    padding: 0.3rem var(--content-gutter) 0.85rem;
+    scroll-padding-inline: var(--content-gutter);
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
   }
   .cards::-webkit-scrollbar { display: none; }
-  .card { flex: 0 0 68vw; padding: 0.9rem 1rem; scroll-snap-align: start; }
-  .card-value { font-size: 1.45rem; }
-  .chat .panel, .history .panel { padding: 1rem; }
-  .suggestion-card { flex-basis: 76%; min-height: 2.5rem; }
-  .context-rail { margin-top: 2rem; }
+  .card { flex: 0 0 64vw; padding: 0.82rem 0.9rem; scroll-snap-align: start; }
+  .card-value { font-size: 1.38rem; }
+  .chat .panel, .history .panel { padding: 0.9rem; }
+  .suggestion-viewport {
+    margin-inline: -0.2rem;
+    padding: 0.15rem 0.45rem 0.35rem;
+    border-inline: 1px solid var(--line);
+    border-radius: 10px;
+    scroll-padding-inline: 0.45rem;
+  }
+  .suggestion-card { flex-basis: 72%; min-height: 2.45rem; padding: 0.45rem 0.7rem; }
+  .context-rail { margin-top: 1.3rem; }
   #ask-form { flex-direction: column; }
-  #question { min-height: 3.15rem; padding: 0.8rem 0.9rem; }
-  .ask-actions button { min-height: 3.15rem; }
-  .ask-actions button[type="submit"] { flex: 1; }
+  #question { min-height: 3rem; padding: 0.75rem 0.85rem; font-size: 0.94rem; }
+  .ask-actions { justify-content: flex-end; gap: 0.5rem; }
+  .ask-actions button { min-height: 2.8rem; }
+  .voice-input { flex-basis: 2.8rem; width: 2.8rem; }
+  .ask-actions button[type="submit"] { flex: 1; min-width: 0; min-height: 2.8rem; padding-inline: 1.25rem; }
+  .voice-status { margin-top: 0.25rem; }
   .history-list li { flex-direction: column; gap: 0.6rem; }
   .history-list button { align-self: flex-end; }
 }
