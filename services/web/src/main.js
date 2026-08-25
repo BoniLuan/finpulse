@@ -14,6 +14,7 @@ import {
 
 const SESSION_HISTORY_KEY = "finpulse_session_history";
 const THEME_KEY = "finpulse_theme";
+let historyExpanded = false;
 
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -127,11 +128,75 @@ function renderChips(onPick) {
   }
 }
 
+function wireVoiceInput(input) {
+  const button = $("voice-input");
+  const status = $("voice-status");
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    button.hidden = true;
+    status.textContent = "Voice dictation is not available in this browser.";
+    return;
+  }
+
+  const recognition = new Recognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+  recognition.lang = navigator.language || "pt-BR";
+  let listening = false;
+  let startingText = "";
+
+  const setListening = (active) => {
+    listening = active;
+    button.classList.toggle("listening", active);
+    button.setAttribute("aria-pressed", String(active));
+    button.title = active ? "Stop listening" : "Dictate a question";
+    status.textContent = active
+      ? "Listening… speak your question."
+      : "Voice is transcribed by your browser and remains editable.";
+  };
+
+  recognition.addEventListener("start", () => setListening(true));
+  recognition.addEventListener("end", () => {
+    setListening(false);
+    input.focus();
+  });
+  recognition.addEventListener("result", (event) => {
+    let transcript = "";
+    for (let index = event.resultIndex; index < event.results.length; index += 1) {
+      transcript += event.results[index][0].transcript;
+    }
+    input.value = [startingText, transcript.trim()].filter(Boolean).join(" ");
+  });
+  recognition.addEventListener("error", (event) => {
+    const messages = {
+      "not-allowed": "Microphone permission was denied.",
+      "audio-capture": "No microphone was found.",
+      "no-speech": "No speech was detected. Try again.",
+      network: "The browser speech service is unavailable.",
+    };
+    status.textContent = messages[event.error] || "Voice dictation could not start.";
+  });
+
+  button.addEventListener("click", () => {
+    if (listening) {
+      recognition.stop();
+      return;
+    }
+    startingText = input.value.trim();
+    try { recognition.start(); }
+    catch { status.textContent = "Voice dictation is already starting."; }
+  });
+
+  status.textContent = "Voice is transcribed by your browser and remains editable.";
+}
+
 function wireChat() {
   const form = document.getElementById("ask-form");
   const input = document.getElementById("question");
-  const button = form.querySelector("button");
+  const button = form.querySelector('button[type="submit"]');
   const answer = document.getElementById("answer");
+  wireVoiceInput(input);
 
   function showAnswer(result) {
     const text = document.createElement("p");
@@ -185,7 +250,7 @@ function saveSessionHistory(row) {
 
 function syncContextRail() {
   const rail = $("context-rail");
-  const visible = !$("history-section").hidden || !$("alerts-section").hidden;
+  const visible = !$("alerts-section").hidden;
   rail.hidden = !visible;
   $("assistant").classList.toggle("no-context", !visible);
 }
@@ -198,9 +263,16 @@ async function renderHistoryPanel(loggedIn) {
   $("history-section").hidden = rows.length === 0;
   syncContextRail();
   if (!rows.length) return;
+  if (historyExpanded) {
+    await loadHistory(loggedIn, rows);
+    return;
+  }
   panel.innerHTML = `<div class="history-gate"><p>${loggedIn ? "Your saved conversations are available on this account." : "Questions from this browser session stay only in this tab."}</p>` +
     `<button id="show-history" class="ghost">Show history</button></div>`;
-  $("show-history").addEventListener("click", () => loadHistory(loggedIn, rows));
+  $("show-history").addEventListener("click", () => {
+    historyExpanded = true;
+    loadHistory(loggedIn, rows);
+  });
 }
 
 async function loadHistory(loggedIn, knownRows = null) {

@@ -10,8 +10,10 @@ The `.md` files lead; code implements them. **`docs/WORKFLOW.md` is the map** �
 it holds the development loop, the documentation map (which doc owns what), the
 "definition of done", and the live roadmap. Start there for any task.
 
-Rule for every change (feature, fix, refactor): update the owning doc(s) in the
-**same** change as the code — they ship together in one commit, never apart.
+Rule for every change (feature, fix, refactor): update the owning doc(s) with
+the code. Build first, test the rebuilt result, and leave changes uncommitted
+until the user explicitly asks for a commit. When requested, code and docs ship
+together in the same commit.
 - Endpoint added/changed → update `docs/api.md`.
 - Service or data flow changed → update `docs/architecture.md`.
 - Significant decision → add an ADR in `docs/adr/` (don't edit old ones).
@@ -41,7 +43,8 @@ Dependencies point inward; Domain has no framework/IO imports.
 - AI:  `services/ai-worker` · `pytest`, `uvicorn app.main:app --reload`
 
 ## Conventions
-- **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `test:`).
+- **Commits:** Never commit without an explicit user request. When requested,
+  use Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `test:`).
 - **PHP:** PSR-12, strict_types, constructor injection via PHP-DI, no logic in controllers.
 - **Python:** type-hinted, ruff + mypy clean; AI provider chosen via `LLM_PROVIDER` env.
 - **Config:** all via env (`.env`, never commit secrets); see `.env.example`.

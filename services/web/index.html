@@ -40,19 +40,28 @@
           <form id="ask-form">
             <input id="question" type="text" autocomplete="off"
                    placeholder="e.g. how much does 10 thousand in savings yield in 1 year?" />
-            <button type="submit">Ask</button>
+            <div class="ask-actions">
+              <button id="voice-input" class="voice-input ghost" type="button"
+                      aria-label="Dictate a question" aria-pressed="false" title="Dictate a question">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm-7-3a1 1 0 1 1 2 0 5 5 0 0 0 10 0 1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-2.08A7 7 0 0 1 5 12Z" />
+                </svg>
+              </button>
+              <button type="submit">Ask</button>
+            </div>
           </form>
+          <p id="voice-status" class="voice-status" aria-live="polite"></p>
           <div id="chips" class="chips"></div>
           <div id="answer" class="answer"></div>
         </div>
       </section>
 
-      <aside id="context-rail" class="context-rail" hidden>
-        <section id="history-section" class="history" hidden>
-          <div class="section-heading"><div><span class="eyebrow">Recent</span><h2>Conversation history</h2></div></div>
-          <div id="history-panel" class="panel"></div>
-        </section>
+      <section id="history-section" class="history" hidden>
+        <div class="section-heading"><div><span class="eyebrow">Recent</span><h2>Conversation history</h2></div></div>
+        <div id="history-panel" class="panel"></div>
+      </section>
 
+      <aside id="context-rail" class="context-rail" hidden>
         <section id="alerts-section" class="alerts" hidden>
           <div class="section-heading"><div><span class="eyebrow">Tracking</span><h2>My alerts</h2></div></div>
           <div id="alerts-panel" class="panel"></div>

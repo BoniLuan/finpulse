@@ -33,8 +33,9 @@ Every change — feature, fix, or refactor — follows the same five steps:
    new provider/channel by implementing its interface — never branch on a type.
 4. **Test.** Business rules (Domain) get unit tests; every new/changed endpoint
    gets a test. Run `make test` and `make lint` (or the per-service commands).
-5. **Commit** with a Conventional Commit. The change must include both the code
-   *and* the doc updates from step 2 — they ship together, never separately.
+5. **Hand off for review after build and tests.** Never commit until the user
+   explicitly asks. When requested, use a Conventional Commit and include both
+   code and documentation together.
 
 ## Definition of done
 
@@ -46,7 +47,9 @@ A change is done only when **all** are true:
 - [ ] Tests cover the change and `make test` is green.
 - [ ] `make lint` is clean.
 - [ ] The roadmap item below is checked off.
-- [ ] One Conventional Commit contains code + docs together.
+- [ ] The rebuilt result was tested and handed off for review.
+- [ ] If the user explicitly requested a commit, one Conventional Commit
+      contains code + docs together.
 
 ## Roadmap (the live to-do that conducts the work)
 
@@ -77,6 +80,8 @@ Check items off as they land. Add new items here before starting them.
 - [x] Responsive dashboard refresh: wider desktop layout, contextual side rail,
       mobile indicator carousel, continuous generated market artwork, and a
       rotating question-suggestion carousel.
+- [x] Browser-native voice dictation for the question field, with graceful
+      fallback when speech recognition is unavailable.
 
 ## Conventions quick-reference
 
