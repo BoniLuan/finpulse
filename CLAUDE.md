@@ -39,6 +39,9 @@ Dependencies point inward; Domain has no framework/IO imports.
 - `make migrate` / `make seed` — DB schema / sample data
 - `make test` — PHPUnit + pytest + web tests
 - `make lint` — php-cs-fixer + phpstan + ruff + mypy + eslint
+- `make verify` — test services affected by uncommitted changes
+- `make rebuild-affected` — verify and rebuild only affected images
+- Production-like: `docker compose -f docker-compose.yml up -d --build`
 - API: `services/api` · `composer test`, `php bin/console <cmd>`
 - AI:  `services/ai-worker` · `pytest`, `uvicorn app.main:app --reload`
 

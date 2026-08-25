@@ -56,7 +56,7 @@ Requirements: Docker + Docker Compose.
 
 ```bash
 cp .env.example .env      # defaults work out of the box (AI runs in "fake" mode)
-make up                   # build & start the whole stack
+make up                   # start the development stack
 make migrate              # create the database schema
 ```
 
@@ -73,6 +73,8 @@ credentials**.
 | `make migrate` / `make seed` | create schema / load sample data |
 | `make test` | run PHPUnit + pytest |
 | `make lint` | run all linters |
+| `make verify` | test services affected by current changes |
+| `make rebuild-affected` | verify and rebuild only affected images |
 | `make logs` | tail all service logs |
 
 ---

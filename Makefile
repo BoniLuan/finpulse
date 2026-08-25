@@ -1,20 +1,27 @@
 # FinPulse — developer entrypoints. See CLAUDE.md for conventions.
 COMPOSE = docker compose
+POWERSHELL ?= powershell
 
-.PHONY: help up down build logs ps migrate seed test lint api-shell ai-shell
+.PHONY: help up down build verify rebuild-affected logs ps migrate seed test lint api-shell ai-shell
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-up: ## Build and start the whole stack
-	$(COMPOSE) up -d --build
+up: ## Start the development stack (source is live-mounted)
+	$(COMPOSE) up -d
 
 down: ## Stop the stack
 	$(COMPOSE) down
 
 build: ## Build images
 	$(COMPOSE) build
+
+verify: ## Test services affected by uncommitted changes (PowerShell)
+	$(POWERSHELL) -NoProfile -File scripts/verify-changes.ps1
+
+rebuild-affected: ## Verify and rebuild only affected images (PowerShell)
+	$(POWERSHELL) -NoProfile -File scripts/verify-changes.ps1 -BuildAffected
 
 logs: ## Tail all logs
 	$(COMPOSE) logs -f

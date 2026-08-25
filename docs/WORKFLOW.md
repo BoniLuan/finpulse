@@ -32,7 +32,8 @@ Every change — feature, fix, or refactor — follows the same five steps:
    (`Http → Application → Domain ← Infrastructure`; Domain stays pure). Add a
    new provider/channel by implementing its interface — never branch on a type.
 4. **Test.** Business rules (Domain) get unit tests; every new/changed endpoint
-   gets a test. Run `make test` and `make lint` (or the per-service commands).
+   gets a test. During development, run `make verify` to test only affected
+   services, or `make test` and `make lint` for the complete suite.
 5. **Hand off for review after build and tests.** Never commit until the user
    explicitly asks. When requested, use a Conventional Commit and include both
    code and documentation together.
@@ -89,3 +90,22 @@ See `CLAUDE.md` for the full list. The essentials:
 - Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 - Config via env only; never commit secrets.
 - One class per file (PHP), type-hinted Python, plain ES-module JS (no build).
+
+## Development containers
+
+The default `docker compose` command automatically loads
+`docker-compose.override.yml`. Application source is bind-mounted for fast
+development feedback: web changes need only a browser refresh, the AI worker
+reloads automatically, and PHP source is immediately available in the API
+container.
+
+Use `make rebuild-affected` after changes. It runs relevant tests and rebuilds
+only when a Dockerfile, dependency manifest, Nginx configuration, Compose file,
+or other image input changed. Use `make build` for an intentional full rebuild.
+
+Production-like runs must exclude the development override and use immutable
+images:
+
+```sh
+docker compose -f docker-compose.yml up -d --build
+```
