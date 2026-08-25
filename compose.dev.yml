@@ -1,6 +1,10 @@
-# Dev overrides: bind mounts for live code, exposed ports for direct access.
-# Loaded automatically by `docker compose` on top of docker-compose.yml.
+# Development overrides: bind mounts, debug settings and local-only ports.
+# Load explicitly with: docker compose -f docker-compose.yml -f compose.dev.yml
 services:
+  gateway:
+    ports:
+      - "127.0.0.1:8080:80"
+
   api:
     environment:
       APP_ENV: dev
@@ -21,7 +25,7 @@ services:
     volumes:
       - ./services/ai-worker:/app
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
   web:
     volumes:
@@ -29,17 +33,17 @@ services:
       - ./services/web/src:/usr/share/nginx/html/src:ro
       - ./services/web/assets:/usr/share/nginx/html/assets:ro
     ports:
-      - "8081:80" # direct access to the web container (bypassing the gateway)
+      - "127.0.0.1:8081:80" # direct access to the web container (bypassing the gateway)
 
   db:
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
 
   redis:
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
   mailpit:
     ports:
-      - "8025:8025" # Mailpit web UI: captured alert emails
-      - "1025:1025" # SMTP
+      - "127.0.0.1:8025:8025" # Mailpit web UI: captured alert emails
+      - "127.0.0.1:1025:1025" # SMTP

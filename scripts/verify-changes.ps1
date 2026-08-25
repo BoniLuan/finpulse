@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$ComposeFiles = @("-f", "docker-compose.yml", "-f", "compose.dev.yml")
 
 git rev-parse --verify $BaseRef *> $null
 if ($LASTEXITCODE -ne 0) {
@@ -27,20 +28,20 @@ $changed | ForEach-Object { Write-Host "  $_" }
 $touchesApi = $changed | Where-Object { $_ -like "services/api/*" }
 $touchesAi = $changed | Where-Object { $_ -like "services/ai-worker/*" }
 $touchesWeb = $changed | Where-Object { $_ -like "services/web/*" }
-$touchesCompose = $changed | Where-Object { $_ -in @("docker-compose.yml", "docker-compose.override.yml") }
+$touchesCompose = $changed | Where-Object { $_ -in @("docker-compose.yml", "compose.dev.yml") }
 
 if ($touchesCompose) {
-    docker compose config --quiet
+    docker compose @ComposeFiles config --quiet
     if ($LASTEXITCODE -ne 0) { throw "Docker Compose configuration is invalid." }
 }
 
 if ($touchesApi) {
-    docker compose exec -T api composer test
+    docker compose @ComposeFiles exec -T api composer test
     if ($LASTEXITCODE -ne 0) { throw "API tests failed." }
 }
 
 if ($touchesAi) {
-    docker compose exec -T ai-worker pytest -q
+    docker compose @ComposeFiles exec -T ai-worker pytest -q
     if ($LASTEXITCODE -ne 0) { throw "AI worker tests failed." }
 }
 
@@ -80,16 +81,16 @@ if ($BuildAffected) {
 
     if ($touchesCompose) {
         Write-Host "Compose changed; rebuilding the stack."
-        docker compose build
+        docker compose @ComposeFiles build
         if ($LASTEXITCODE -ne 0) { throw "Stack build failed." }
-        docker compose up -d
+        docker compose @ComposeFiles up -d
         if ($LASTEXITCODE -ne 0) { throw "Stack restart failed." }
     } elseif ($services.Count -gt 0) {
         [string[]]$orderedServices = @($services | Sort-Object)
         Write-Host "Rebuilding: $($orderedServices -join ', ')"
-        docker compose build @orderedServices
+        docker compose @ComposeFiles build @orderedServices
         if ($LASTEXITCODE -ne 0) { throw "Affected image build failed." }
-        docker compose up -d @orderedServices
+        docker compose @ComposeFiles up -d @orderedServices
         if ($LASTEXITCODE -ne 0) { throw "Affected service restart failed." }
     } else {
         Write-Host "No image rebuild is required; development bind mounts provide the changes live."

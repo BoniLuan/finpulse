@@ -69,4 +69,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build all images
-        run: docker compose build
+        run: docker compose -f docker-compose.yml build

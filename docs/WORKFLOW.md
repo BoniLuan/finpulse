@@ -99,21 +99,21 @@ See `CLAUDE.md` for the full list. The essentials:
 
 ## Development containers
 
-The default `docker compose` command automatically loads
-`docker-compose.override.yml`. Application source is bind-mounted for fast
+The base `docker compose` command loads only `docker-compose.yml` and is safe for
+production. Development explicitly adds `compose.dev.yml`. Application source is
+bind-mounted for fast
 development feedback: web changes need only a browser refresh, the AI worker
 reloads automatically, and PHP source is immediately available in both the API
 and scheduler containers. Unversioned CSS and JavaScript revalidate on refresh,
 while large static assets retain a browser cache.
 
-Use `make rebuild-affected` after changes. It runs relevant tests and rebuilds
+Start development with `make dev-up`, then use `make rebuild-affected` after
+changes. It runs relevant tests and rebuilds
 only when a Dockerfile, dependency manifest, Nginx configuration, Compose file,
 or other image input changed. Web changes receive JavaScript syntax and HTTP
-smoke checks without an image rebuild. Use `make build` for an intentional full
-rebuild.
+smoke checks without an image rebuild. Use `make dev-build` for an intentional full development rebuild.
 
-Production-like runs must exclude the development override and use immutable
-images:
+Production runs use only immutable images:
 
 ```sh
 docker compose -f docker-compose.yml up -d --build

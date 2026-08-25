@@ -16,7 +16,7 @@ RUN apk add --no-cache postgresql-libs \
     && apk del .build-deps
 
 # Xdebug for step debugging. The extension is always installed but stays OFF
-# unless XDEBUG_MODE=debug is set (done in docker-compose.override.yml for dev),
+# unless XDEBUG_MODE=debug is set (done in compose.dev.yml for dev),
 # so production is unaffected.
 RUN apk add --no-cache --virtual .xdebug-deps $PHPIZE_DEPS linux-headers \
     && pecl install xdebug \

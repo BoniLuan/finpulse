@@ -56,11 +56,11 @@ Requirements: Docker + Docker Compose.
 
 ```bash
 cp .env.example .env      # defaults work out of the box (AI runs in "fake" mode)
-make up                   # start the development stack
+make dev-up               # start the development stack
 make migrate              # create the database schema
 ```
 
-Then open <http://localhost> and try the chat box.
+Then open <http://localhost:8080> and try the chat box.
 
 To use real AI, set `LLM_PROVIDER=gemini` and `GEMINI_API_KEY=...` in `.env`
 (Gemini has a free tier). With `LLM_PROVIDER=fake` (the default) the worker
@@ -69,7 +69,8 @@ credentials**.
 
 | Command | Description |
 |---|---|
-| `make up` / `make down` | start / stop the stack |
+| `make up` / `make down` | start / stop production |
+| `make dev-up` / `make dev-down` | start / stop development |
 | `make migrate` / `make seed` | create schema / load sample data |
 | `make test` | run PHPUnit + pytest |
 | `make lint` | run all linters |

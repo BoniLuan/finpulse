@@ -2,8 +2,8 @@ name: finpulse
 
 # Shared environment for the PHP services (api + scheduler).
 x-api-env: &api-env
-  APP_ENV: ${APP_ENV:-dev}
-  APP_DEBUG: ${APP_DEBUG:-true}
+  APP_ENV: prod
+  APP_DEBUG: "false"
   DATABASE_DSN: ${DATABASE_DSN}
   DATABASE_USER: ${DATABASE_USER}
   DATABASE_PASSWORD: ${DATABASE_PASSWORD}

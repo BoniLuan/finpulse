@@ -1,7 +1,7 @@
 # Step debugging the api (Xdebug)
 
 The api runs as **php-fpm inside Docker**. Xdebug 3 is built into the image and
-turned on in dev via `XDEBUG_MODE=debug` (see `docker-compose.override.yml`).
+turned on in dev via `XDEBUG_MODE=debug` (see `compose.dev.yml`).
 It connects back to your editor on **port 9003**.
 
 ## One-time setup
@@ -12,7 +12,7 @@ It connects back to your editor on **port 9003**.
    `/var/www/html` → `services/api`.
 3. Rebuild the api image so Xdebug is present:
    ```
-   docker compose up -d --build api
+   docker compose -f docker-compose.yml -f compose.dev.yml up -d --build api
    ```
 
 ## Debugging a request
@@ -22,9 +22,9 @@ It connects back to your editor on **port 9003**.
 2. Set breakpoints, e.g. in `src/Infrastructure/Bacen/BacenClient.php`
    (`fetch()` = the actual BACEN HTTP call) and in
    `src/Application/Ask/AskQuestion.php` (`handle()`).
-3. Trigger a request: open <http://localhost> and ask, or
+3. Trigger a request: open <http://localhost:8080> and ask, or
    ```
-   curl -X POST http://localhost/api/v1/ask -H "Content-Type: application/json" \
+   curl -X POST http://localhost:8080/api/v1/ask -H "Content-Type: application/json" \
         -d "{\"question\":\"what is the current selic?\"}"
    ```
 
@@ -49,7 +49,7 @@ public/index.php
 the cache first:
 
 ```
-docker compose exec redis redis-cli FLUSHALL
+docker compose -f docker-compose.yml -f compose.dev.yml exec redis redis-cli FLUSHALL
 ```
 
 `xdebug.start_with_request=yes` means every request starts a debug session, so
