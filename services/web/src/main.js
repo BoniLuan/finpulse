@@ -223,6 +223,12 @@ function wireChat() {
   }
 
   async function submit(question) {
+    if (!token.get()) {
+      answer.classList.add("show");
+      answer.innerHTML = "<p>Log in or create an account to use the AI assistant.</p>";
+      openAuthModal("login");
+      return;
+    }
     answer.classList.add("show");
     answer.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
     button.disabled = true;

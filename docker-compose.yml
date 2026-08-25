@@ -12,6 +12,9 @@ x-api-env: &api-env
   JWT_TTL: ${JWT_TTL:-3600}
   RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
   RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60}
+  AI_RATE_LIMIT_MAX: ${AI_RATE_LIMIT_MAX:-5}
+  AI_RATE_LIMIT_WINDOW: ${AI_RATE_LIMIT_WINDOW:-60}
+  AI_DAILY_LIMIT: ${AI_DAILY_LIMIT:-50}
   AI_WORKER_URL: ${AI_WORKER_URL:-http://ai-worker:8000}
   BACEN_BASE_URL: ${BACEN_BASE_URL:-https://api.bcb.gov.br}
   BACEN_CACHE_TTL: ${BACEN_CACHE_TTL:-3600}
@@ -32,12 +35,15 @@ x-api-env: &api-env
 services:
   gateway:
     build: ./infra/gateway
-    ports:
-      - "80:80"
     depends_on:
       - api
       - web
     restart: unless-stopped
+    networks:
+      default:
+      web-proxy:
+        aliases:
+          - finpulse-gateway
 
   api:
     build: ./services/api
@@ -67,7 +73,7 @@ services:
     build: ./services/ai-worker
     environment:
       LLM_PROVIDER: ${LLM_PROVIDER:-fake}
-      LLM_MODEL: ${LLM_MODEL:-gemini-2.5-flash}
+      LLM_MODEL: ${LLM_MODEL:-gemini-3.5-flash-lite}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
@@ -103,3 +109,8 @@ services:
 
 volumes:
   db-data:
+
+networks:
+  web-proxy:
+    name: web-proxy
+    external: true

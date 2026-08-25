@@ -16,6 +16,6 @@ class Settings:
     def from_env() -> Settings:
         return Settings(
             provider=os.getenv("LLM_PROVIDER", "fake").lower(),
-            model=os.getenv("LLM_MODEL", "gemini-1.5-flash"),
+            model=os.getenv("LLM_MODEL", "gemini-3.5-flash-lite"),
             gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         )

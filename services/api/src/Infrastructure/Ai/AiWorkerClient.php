@@ -52,7 +52,8 @@ final class AiWorkerClient implements IntentParser, AnswerWriter
     {
         $response = $this->http->request('POST', rtrim($this->baseUrl, '/') . $path, [
             'json' => $payload,
-            'timeout' => 30,
+            'connect_timeout' => 3,
+            'timeout' => 15,
         ]);
 
         $decoded = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);

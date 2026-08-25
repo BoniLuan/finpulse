@@ -39,8 +39,12 @@ def _to_intent(data: dict[str, Any]) -> dict[str, Any]:
 class GeminiProvider:
     def __init__(self, api_key: str, model: str) -> None:
         from google import genai  # lazy: optional dependency
+        from google.genai import types
 
-        self._client = genai.Client(api_key=api_key)
+        self._client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=15_000),
+        )
         self._model = model
         self._fallback = FakeProvider()
 
@@ -55,6 +59,7 @@ class GeminiProvider:
                     response_mime_type="application/json",
                     response_schema=_IntentOut,
                     temperature=0,
+                    max_output_tokens=512,
                 ),
             )
             data = json.loads(response.text or "{}")
@@ -75,7 +80,7 @@ class GeminiProvider:
             response = self._client.models.generate_content(
                 model=self._model,
                 contents=prompt,
-                config=types.GenerateContentConfig(temperature=0.3),
+                config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=512),
             )
             return (response.text or "").strip() or self._fallback.explain(intent, result)
         except Exception:  # noqa: BLE001

@@ -21,6 +21,11 @@ return [
         'max' => (int) ($_ENV['RATE_LIMIT_MAX'] ?? 60),
         'window' => (int) ($_ENV['RATE_LIMIT_WINDOW'] ?? 60),
     ],
+    'ai_rate_limit' => [
+        'max' => (int) ($_ENV['AI_RATE_LIMIT_MAX'] ?? 5),
+        'window' => (int) ($_ENV['AI_RATE_LIMIT_WINDOW'] ?? 60),
+        'daily_max' => (int) ($_ENV['AI_DAILY_LIMIT'] ?? 50),
+    ],
     'ai_worker' => [
         'url' => $_ENV['AI_WORKER_URL'] ?? 'http://ai-worker:8000',
     ],

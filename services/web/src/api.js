@@ -1,7 +1,7 @@
 // Thin API client. All requests go through the gateway under /api/v1.
 const BASE = "/api/v1";
 const TOKEN_KEY = "finpulse_token";
-const REQUEST_TIMEOUT_MS = 15_000;
+const REQUEST_TIMEOUT_MS = 35_000;
 
 // JWT store (localStorage).
 export const token = {

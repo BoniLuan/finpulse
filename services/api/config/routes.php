@@ -14,8 +14,8 @@ use FinPulse\Http\Action\LoginAction;
 use FinPulse\Http\Action\MeAction;
 use FinPulse\Http\Action\RegisterAction;
 use FinPulse\Http\Action\UpdateMeAction;
+use FinPulse\Http\Middleware\AiRateLimitMiddleware;
 use FinPulse\Http\Middleware\JwtAuthMiddleware;
-use FinPulse\Http\Middleware\OptionalJwtAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -23,7 +23,10 @@ return static function (App $app): void {
     $app->group('/api/v1', function (RouteCollectorProxy $group): void {
         $group->get('/health', HealthAction::class);
         $group->get('/indicators', IndicatorsAction::class);
-        $group->post('/ask', AskAction::class)->add(OptionalJwtAuthMiddleware::class);
+        // Last-added middleware runs first: authenticate, then apply per-user AI quotas.
+        $group->post('/ask', AskAction::class)
+            ->add(AiRateLimitMiddleware::class)
+            ->add(JwtAuthMiddleware::class);
 
         $group->post('/auth/register', RegisterAction::class);
         $group->post('/auth/login', LoginAction::class);

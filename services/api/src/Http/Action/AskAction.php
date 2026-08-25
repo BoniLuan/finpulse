@@ -29,6 +29,12 @@ final class AskAction
             ], 422);
         }
 
+        if (strlen($question) > 1000) {
+            return $this->json($response, [
+                'error' => ['code' => 'validation', 'message' => 'question must be at most 1000 bytes'],
+            ], 422);
+        }
+
         $userId = $request->getAttribute(JwtAuthMiddleware::USER_ATTR);
         $result = $this->askQuestion->handle($question, is_string($userId) ? $userId : null);
 

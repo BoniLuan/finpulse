@@ -22,6 +22,7 @@ use FinPulse\Application\Port\QueryLogRepository;
 use FinPulse\Application\Port\TokenIssuer;
 use FinPulse\Domain\Alert\AlertRepository;
 use FinPulse\Domain\User\UserRepository;
+use FinPulse\Http\Middleware\AiRateLimitMiddleware;
 use FinPulse\Infrastructure\Ai\AiWorkerClient;
 use FinPulse\Infrastructure\Auth\JwtService;
 use FinPulse\Infrastructure\Bacen\BacenClient;
@@ -73,6 +74,13 @@ return static function (ContainerBuilder $builder): void {
         RedisClient::class => static fn (): RedisClient => new RedisClient($settings['redis']['url']),
         RedisCache::class => static fn (ContainerInterface $c): RedisCache
             => new RedisCache($c->get(RedisClient::class)),
+        AiRateLimitMiddleware::class => static fn (ContainerInterface $c): AiRateLimitMiddleware
+            => new AiRateLimitMiddleware(
+                $c->get(RedisCache::class),
+                $settings['ai_rate_limit']['max'],
+                $settings['ai_rate_limit']['window'],
+                $settings['ai_rate_limit']['daily_max'],
+            ),
         ClientInterface::class => static fn (): ClientInterface => new GuzzleClient(),
 
         // ── Ports → adapters ─────────────────────────────────────────────
