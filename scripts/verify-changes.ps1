@@ -45,6 +45,15 @@ if ($touchesAi) {
 }
 
 if ($touchesWeb) {
+    $node = Get-Command node -ErrorAction SilentlyContinue
+    if ($node) {
+        node --check services/web/src/api.js
+        if ($LASTEXITCODE -ne 0) { throw "Web API client syntax check failed." }
+        node --check services/web/src/main.js
+        if ($LASTEXITCODE -ne 0) { throw "Web application syntax check failed." }
+    } else {
+        Write-Warning "Node.js is unavailable; JavaScript syntax checks were skipped."
+    }
     $response = Invoke-WebRequest -UseBasicParsing http://localhost/
     if ($response.StatusCode -ne 200) { throw "Web smoke test failed." }
     Write-Host "Web smoke test passed."
@@ -76,7 +85,7 @@ if ($BuildAffected) {
         docker compose up -d
         if ($LASTEXITCODE -ne 0) { throw "Stack restart failed." }
     } elseif ($services.Count -gt 0) {
-        $orderedServices = @($services) | Sort-Object
+        [string[]]$orderedServices = @($services | Sort-Object)
         Write-Host "Rebuilding: $($orderedServices -join ', ')"
         docker compose build @orderedServices
         if ($LASTEXITCODE -ne 0) { throw "Affected image build failed." }

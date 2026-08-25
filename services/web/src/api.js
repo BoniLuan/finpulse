@@ -1,6 +1,7 @@
 // Thin API client. All requests go through the gateway under /api/v1.
 const BASE = "/api/v1";
 const TOKEN_KEY = "finpulse_token";
+const REQUEST_TIMEOUT_MS = 15_000;
 
 // JWT store (localStorage).
 export const token = {
@@ -10,6 +11,8 @@ export const token = {
 };
 
 async function request(path, { method = "GET", body, auth = false } = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const headers = {};
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (auth) {
@@ -17,11 +20,20 @@ async function request(path, { method = "GET", body, auth = false } = {}) {
     if (t) headers["Authorization"] = `Bearer ${t}`;
   }
 
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("The request took too long. Please try again.");
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);

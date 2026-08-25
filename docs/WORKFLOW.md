@@ -101,7 +101,9 @@ container.
 
 Use `make rebuild-affected` after changes. It runs relevant tests and rebuilds
 only when a Dockerfile, dependency manifest, Nginx configuration, Compose file,
-or other image input changed. Use `make build` for an intentional full rebuild.
+or other image input changed. Web changes receive JavaScript syntax and HTTP
+smoke checks without an image rebuild. Use `make build` for an intentional full
+rebuild.
 
 Production-like runs must exclude the development override and use immutable
 images:
