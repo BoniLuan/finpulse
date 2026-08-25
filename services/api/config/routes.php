@@ -13,6 +13,7 @@ use FinPulse\Http\Action\ListHistoryAction;
 use FinPulse\Http\Action\LoginAction;
 use FinPulse\Http\Action\MeAction;
 use FinPulse\Http\Action\RegisterAction;
+use FinPulse\Http\Action\UpdateMeAction;
 use FinPulse\Http\Middleware\JwtAuthMiddleware;
 use FinPulse\Http\Middleware\OptionalJwtAuthMiddleware;
 use Slim\App;
@@ -29,6 +30,7 @@ return static function (App $app): void {
 
         // Authenticated, user-scoped routes.
         $group->get('/auth/me', MeAction::class)->add(JwtAuthMiddleware::class);
+        $group->patch('/auth/me', UpdateMeAction::class)->add(JwtAuthMiddleware::class);
         $group->get('/alerts', ListAlertsAction::class)->add(JwtAuthMiddleware::class);
         $group->post('/alerts', CreateAlertAction::class)->add(JwtAuthMiddleware::class);
         $group->delete('/alerts/{id}', DeleteAlertAction::class)->add(JwtAuthMiddleware::class);

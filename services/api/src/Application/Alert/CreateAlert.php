@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FinPulse\Application\Alert;
 
 use FinPulse\Domain\Alert\Alert;
+use FinPulse\Domain\Alert\AlertMetric;
 use FinPulse\Domain\Alert\AlertRepository;
-use FinPulse\Domain\Finance\Indicator;
 use Ramsey\Uuid\Uuid;
 
 final class CreateAlert
@@ -22,7 +22,7 @@ final class CreateAlert
         float $threshold,
         string $channel = 'log',
     ): string {
-        $ind = Indicator::fromName($indicator)
+        $ind = AlertMetric::fromName($indicator)
             ?? throw new \InvalidArgumentException('unknown indicator');
 
         $alert = new Alert(

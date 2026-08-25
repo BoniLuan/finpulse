@@ -71,7 +71,7 @@ Rate limited per client IP (see `RATE_LIMIT_*`). Returns `429` when exceeded.
 ## Auth
 
 ```
-POST /api/v1/auth/register   { "email": "...", "password": "..." }  → 201 { "id" }
+POST /api/v1/auth/register   { "email", "password", "display_name", "phone"? }  → 201 { "id" }
 POST /api/v1/auth/login      { "email": "...", "password": "..." }  → 200 { "token", "expires_in" }
 ```
 
@@ -79,7 +79,8 @@ POST /api/v1/auth/login      { "email": "...", "password": "..." }  → 200 { "t
 routes.
 
 ```
-GET /api/v1/auth/me      Authorization: Bearer <token>   → 200 { "id", "email" }
+GET   /api/v1/auth/me    Authorization: Bearer <token>   → 200 { "id", "email", "display_name", "phone" }
+PATCH /api/v1/auth/me    { "display_name", "phone"? }  → 200 { "id", "email", "display_name", "phone" }
 ```
 
 ## Alerts (protected, user-scoped)
@@ -96,8 +97,13 @@ DELETE /api/v1/alerts/{id}       → 204 on success, 404 if not found / not owne
 `channel` is one of `log`, `email`, or `whatsapp`. Stored alerts are evaluated
 automatically by the `scheduler` service (which runs `php bin/console
 alerts:check` on an interval) and dispatched through that channel, with a
-per-alert cooldown to avoid repeat notifications. An unsupported channel is
-rejected with `400`.
+  per-alert cooldown to avoid repeat notifications. An unsupported channel is
+  rejected with `400`.
+
+  `indicator` accepts `selic`, `cdi`, `ipca`, `usd`, `poupanca`, `btc`, or
+  `eth`. The first five use cached BACEN data; BTC and ETH use cached BRL spot
+  prices from Coinbase. Operators remain `>` and `<` in the HTTP contract, but
+  the web interface presents them as “rises above” and “falls below.”
 
 ### Conversation history
 

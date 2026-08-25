@@ -17,7 +17,7 @@ final class PdoUserRepository implements UserRepository
     public function findByEmail(string $email): ?User
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, email, password_hash FROM users WHERE email = :email',
+            'SELECT id, email, password_hash, display_name, phone FROM users WHERE email = :email',
         );
         $stmt->execute(['email' => $email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,13 +26,13 @@ final class PdoUserRepository implements UserRepository
             return null;
         }
 
-        return new User($row['id'], $row['email'], $row['password_hash']);
+        return $this->hydrate($row);
     }
 
     public function findById(string $id): ?User
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, email, password_hash FROM users WHERE id = :id',
+            'SELECT id, email, password_hash, display_name, phone FROM users WHERE id = :id',
         );
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -41,20 +41,35 @@ final class PdoUserRepository implements UserRepository
             return null;
         }
 
-        return new User($row['id'], $row['email'], $row['password_hash']);
+        return $this->hydrate($row);
     }
 
     public function save(User $user): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO users (id, email, password_hash)
-             VALUES (:id, :email, :hash)
-             ON CONFLICT (id) DO UPDATE SET email = :email, password_hash = :hash',
+            'INSERT INTO users (id, email, password_hash, display_name, phone)
+             VALUES (:id, :email, :hash, :display_name, :phone)
+             ON CONFLICT (id) DO UPDATE SET email = :email, password_hash = :hash,
+                display_name = :display_name, phone = :phone',
         );
         $stmt->execute([
             'id' => $user->id,
             'email' => $user->email,
             'hash' => $user->passwordHash,
+            'display_name' => $user->displayName,
+            'phone' => $user->phone,
         ]);
+    }
+
+    /** @param array<string, mixed> $row */
+    private function hydrate(array $row): User
+    {
+        return new User(
+            $row['id'],
+            $row['email'],
+            $row['password_hash'],
+            $row['display_name'] !== null ? (string) $row['display_name'] : null,
+            $row['phone'] !== null ? (string) $row['phone'] : null,
+        );
     }
 }

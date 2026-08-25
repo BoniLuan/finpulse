@@ -6,9 +6,11 @@ namespace FinPulse\Tests\Integration;
 
 use FinPulse\Application\Alert\CheckAlerts;
 use FinPulse\Application\Port\AlertThrottle;
+use FinPulse\Application\Port\CryptoPriceProvider;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\NotificationChannel;
 use FinPulse\Domain\Alert\Alert;
+use FinPulse\Domain\Alert\AlertMetric;
 use FinPulse\Domain\Finance\Indicator;
 use FinPulse\Domain\Finance\IndicatorSeries;
 use FinPulse\Domain\User\User;
@@ -41,7 +43,11 @@ final class CheckAlertsTest extends TestCase
     public function testWhatsAppChannelUsesConfiguredRecipient(): void
     {
         $spy = new SpyChannel('whatsapp');
-        $check = $this->build('whatsapp', $spy);
+        $check = $this->build(
+            'whatsapp',
+            $spy,
+            new User('u1', 'demo@finpulse.dev', 'x', 'Demo user', '5518999999999'),
+        );
 
         self::assertSame(1, $check->handle());
         self::assertSame('5518999999999', $spy->sent[0]['to']);
@@ -56,19 +62,41 @@ final class CheckAlertsTest extends TestCase
         self::assertSame([], $spy->sent);
     }
 
-    private function build(string $channel, SpyChannel $spy, ?User $user = null): CheckAlerts
+    public function testCryptoAlertUsesTheCryptoPriceProvider(): void
     {
-        $repo = new OneAlertRepository(new Alert('a1', 'u1', Indicator::USD, '>', 5.0, $channel));
+        $spy = new SpyChannel('log');
+        $check = $this->build('log', $spy, null, AlertMetric::BTC, 400000.0);
+
+        self::assertSame(1, $check->handle());
+        self::assertStringContainsString('Bitcoin price in BRL', $spy->sent[0]['msg']);
+    }
+
+    private function build(
+        string $channel,
+        SpyChannel $spy,
+        ?User $user = null,
+        AlertMetric $metric = AlertMetric::USD,
+        float $threshold = 5.0,
+    ): CheckAlerts {
+        $repo = new OneAlertRepository(new Alert('a1', 'u1', $metric, '>', $threshold, $channel));
 
         return new CheckAlerts(
             $repo,
             new TriggerProvider(6.0), // 6.0 > 5.0 → triggers
+            new AlertCryptoProvider(),
             new StubUserRepo($user),
             new MemoryThrottle(),
             new NullLogger(),
             ['log' => $spy, 'email' => $spy, 'whatsapp' => $spy],
-            '5518999999999',
         );
+    }
+}
+
+final class AlertCryptoProvider implements CryptoPriceProvider
+{
+    public function prices(): array
+    {
+        return ['btc' => 500000.0, 'eth' => 20000.0];
     }
 }
 

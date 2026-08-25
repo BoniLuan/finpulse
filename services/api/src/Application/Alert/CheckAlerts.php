@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FinPulse\Application\Alert;
 
 use FinPulse\Application\Port\AlertThrottle;
+use FinPulse\Application\Port\CryptoPriceProvider;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\NotificationChannel;
 use FinPulse\Domain\Alert\Alert;
@@ -23,11 +24,11 @@ final class CheckAlerts
     public function __construct(
         private readonly AlertRepository $alerts,
         private readonly IndicatorDataProvider $data,
+        private readonly CryptoPriceProvider $crypto,
         private readonly UserRepository $users,
         private readonly AlertThrottle $throttle,
         private readonly LoggerInterface $logger,
         private readonly array $channels,
-        private readonly string $whatsAppRecipient,
     ) {
     }
 
@@ -36,7 +37,7 @@ final class CheckAlerts
     {
         $sent = 0;
         foreach ($this->alerts->all() as $alert) {
-            $value = $this->data->latest($alert->indicator);
+            $value = $this->valueFor($alert);
             if (!$alert->isTriggeredBy($value) || !$this->throttle->shouldSend($alert->id)) {
                 continue;
             }
@@ -66,11 +67,26 @@ final class CheckAlerts
 
     private function recipientFor(Alert $alert): string
     {
+        $user = $this->users->findById($alert->userId);
+
         return match ($alert->channel) {
-            'email' => $this->users->findById($alert->userId)?->email ?? '',
-            'whatsapp' => $this->whatsAppRecipient,
+            'email' => $user?->email ?? '',
+            'whatsapp' => $user?->phone ?? '',
             default => $alert->userId,
         };
+    }
+
+    private function valueFor(Alert $alert): float
+    {
+        $economicIndicator = $alert->indicator->economicIndicator();
+        if ($economicIndicator !== null) {
+            return $this->data->latest($economicIndicator);
+        }
+
+        $prices = $this->crypto->prices();
+
+        return $prices[$alert->indicator->value]
+            ?? throw new \RuntimeException('Crypto price is unavailable.');
     }
 
     private function message(Alert $alert, float $value): string

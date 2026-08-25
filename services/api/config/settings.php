@@ -47,6 +47,5 @@ return [
         'token' => $_ENV['WHATSAPP_TOKEN'] ?? '',
         'phone_number_id' => $_ENV['WHATSAPP_PHONE_NUMBER_ID'] ?? '',
         'api_version' => $_ENV['WHATSAPP_API_VERSION'] ?? 'v21.0',
-        'recipient' => $_ENV['WHATSAPP_RECIPIENT'] ?? '',
     ],
 ];

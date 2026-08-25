@@ -8,6 +8,7 @@ use FinPulse\Application\Alert\CreateAlert;
 use FinPulse\Application\Ask\AskQuestion;
 use FinPulse\Application\Auth\LoginUser;
 use FinPulse\Application\Auth\RegisterUser;
+use FinPulse\Application\Auth\UpdateProfile;
 use FinPulse\Application\History\DeleteHistory;
 use FinPulse\Application\History\ListHistory;
 use FinPulse\Application\Indicator\ListIndicators;
@@ -156,6 +157,8 @@ return static function (ContainerBuilder $builder): void {
             => new RegisterUser($c->get(UserRepository::class)),
         LoginUser::class => static fn (ContainerInterface $c)
             => new LoginUser($c->get(UserRepository::class), $c->get(TokenIssuer::class)),
+        UpdateProfile::class => static fn (ContainerInterface $c)
+            => new UpdateProfile($c->get(UserRepository::class)),
         ListHistory::class => static fn (ContainerInterface $c)
             => new ListHistory($c->get(QueryLogRepository::class)),
         DeleteHistory::class => static fn (ContainerInterface $c)
@@ -167,11 +170,11 @@ return static function (ContainerBuilder $builder): void {
         CheckAlerts::class => static fn (ContainerInterface $c) => new CheckAlerts(
             $c->get(AlertRepository::class),
             $c->get(IndicatorDataProvider::class),
+            $c->get(CryptoPriceProvider::class),
             $c->get(UserRepository::class),
             $c->get(AlertThrottle::class),
             $c->get(LoggerInterface::class),
             $c->get('channels'),
-            $settings['whatsapp']['recipient'],
         ),
     ]);
 };

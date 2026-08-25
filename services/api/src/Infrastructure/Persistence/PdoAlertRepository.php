@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FinPulse\Infrastructure\Persistence;
 
 use FinPulse\Domain\Alert\Alert;
+use FinPulse\Domain\Alert\AlertMetric;
 use FinPulse\Domain\Alert\AlertRepository;
-use FinPulse\Domain\Finance\Indicator;
 use PDO;
 
 final class PdoAlertRepository implements AlertRepository
@@ -71,7 +71,7 @@ final class PdoAlertRepository implements AlertRepository
             static fn (array $r): Alert => new Alert(
                 $r['id'],
                 $r['user_id'],
-                Indicator::from($r['indicator']),
+                AlertMetric::from($r['indicator']),
                 $r['operator'],
                 (float) $r['threshold'],
                 $r['channel'],

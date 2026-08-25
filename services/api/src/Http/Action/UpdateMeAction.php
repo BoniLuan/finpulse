@@ -4,30 +4,28 @@ declare(strict_types=1);
 
 namespace FinPulse\Http\Action;
 
-use FinPulse\Domain\User\UserRepository;
+use FinPulse\Application\Auth\UpdateProfile;
 use FinPulse\Http\JsonResponder;
 use FinPulse\Http\Middleware\JwtAuthMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class MeAction
+final class UpdateMeAction
 {
     use JsonResponder;
 
-    public function __construct(private readonly UserRepository $users)
+    public function __construct(private readonly UpdateProfile $updateProfile)
     {
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $userId = (string) $request->getAttribute(JwtAuthMiddleware::USER_ATTR);
-        $user = $this->users->findById($userId);
-
-        if ($user === null) {
-            return $this->json($response, [
-                'error' => ['code' => 'not_found', 'message' => 'user not found'],
-            ], 404);
-        }
+        $body = (array) $request->getParsedBody();
+        $user = $this->updateProfile->handle(
+            (string) $request->getAttribute(JwtAuthMiddleware::USER_ATTR),
+            (string) ($body['display_name'] ?? ''),
+            (string) ($body['phone'] ?? ''),
+        );
 
         return $this->json($response, [
             'id' => $user->id,

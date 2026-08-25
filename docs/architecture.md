@@ -32,7 +32,7 @@ orchestration; Python owns AI; the frontend is thin.**
 | `api` | PHP 8.3 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
 | `web` | static HTML/CSS/JS (ES modules, no build) | Responsive dashboard, live indicator carousel, chat, contextual history/alerts, and a theme-aware market background. |
-| `db` | PostgreSQL 16 | Users, alerts, and authenticated conversation history/query logs. |
+| `db` | PostgreSQL 16 | User profiles/contact destinations, alerts, and authenticated conversation history/query logs. |
 | `redis` | Redis 7 | BACEN series cache, simple job queue, rate-limit counters. |
 
 The gateway resolves `api` and `web` through Docker's embedded DNS with a short
@@ -69,8 +69,8 @@ interfaces declared by `Domain`/`Application`; the DI container wires them in
 
 The static web client stores anonymous conversation history in
 `sessionStorage`. Authenticated history is read and deleted through user-scoped
-API routes. Previous history and alerts are collapsed at the start of each UI
-session and loaded only after an explicit user action.
+API routes. History and alerts are loaded only after an explicit user action;
+their expanded preference is then retained for the current browser-tab session.
 
 The live-indicators use case combines BACEN SGS economic series with BTC/BRL
 and ETH/BRL spot prices from Coinbase's unauthenticated public Data API. Crypto
@@ -79,10 +79,12 @@ responses are cached in Redis for `CRYPTO_CACHE_TTL` seconds.
 ## Alerts
 
 `POST /api/v1/alerts` (JWT) persists a user-scoped alert. The **`scheduler`**
-service runs `php bin/console alerts:check` every `ALERTS_INTERVAL` seconds; it
-evaluates each alert against live data and, when triggered, dispatches through a
-`NotificationChannel` — `log`, **`email`** (SMTP / Mailpit), or **`whatsapp`**
-(Meta Cloud API). A Redis-backed `AlertThrottle` mutes a fired alert for
+service runs `php bin/console alerts:check` every `ALERTS_INTERVAL` seconds. It
+evaluates BACEN metrics through `IndicatorDataProvider` and BTC/ETH metrics
+through `CryptoPriceProvider`; when triggered, it dispatches through a
+`NotificationChannel` — `log`, **`email`** (the owner's account email via SMTP
+/ Mailpit), or **`whatsapp`** (the owner's profile phone via Meta Cloud API). A
+Redis-backed `AlertThrottle` mutes a fired alert for
 `ALERTS_COOLDOWN` seconds to prevent re-notifying every cycle. See
 [ADR 0006](adr/0006-notification-channels-and-scheduler.md).
 
@@ -95,3 +97,4 @@ See the ADRs:
 - [0004 — Static frontend, no build tooling](adr/0004-static-frontend-no-build.md)
 - [0005 — Gemini via the google-genai SDK with schema JSON](adr/0005-gemini-genai-sdk.md)
 - [0006 — Notification channels and the alerts scheduler](adr/0006-notification-channels-and-scheduler.md)
+- [0007 — User profile contact routing](adr/0007-user-profile-alert-routing.md)

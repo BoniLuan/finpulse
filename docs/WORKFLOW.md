@@ -76,7 +76,12 @@ Check items off as they land. Add new items here before starting them.
 - [ ] End-to-end test (spin the stack, hit `/ask`, assert).
 - [x] Conversation history: session-only for guests, persistent for authenticated
       users, with row deletion and a session-persisted show/hide preference.
-- [x] Progressive account panels: do not load previous alerts or history until requested.
+- [x] Progressive account panels: session-persisted show/hide controls for history
+      and authenticated alerts, without fetching hidden records.
+- [x] Flexible alert builder: readable conditions, delivery selection, and
+      scheduler-backed BACEN plus BTC/ETH market metrics.
+- [x] User profiles with display name and optional mobile number; email and
+      WhatsApp alerts resolve the owning user's contact destination.
 - [x] Persistent light/dark theme switch.
 - [x] More free live indicators: cached BTC/BRL and ETH/BRL spot prices.
 - [x] Responsive dashboard refresh: wider desktop layout, contextual side rail,
@@ -97,9 +102,9 @@ See `CLAUDE.md` for the full list. The essentials:
 The default `docker compose` command automatically loads
 `docker-compose.override.yml`. Application source is bind-mounted for fast
 development feedback: web changes need only a browser refresh, the AI worker
-reloads automatically, and PHP source is immediately available in the API
-container. Unversioned CSS and JavaScript revalidate on refresh, while large
-static assets retain a browser cache.
+reloads automatically, and PHP source is immediately available in both the API
+and scheduler containers. Unversioned CSS and JavaScript revalidate on refresh,
+while large static assets retain a browser cache.
 
 Use `make rebuild-affected` after changes. It runs relevant tests and rebuilds
 only when a Dockerfile, dependency manifest, Nginx configuration, Compose file,

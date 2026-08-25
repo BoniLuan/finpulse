@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace FinPulse\Domain\Alert;
 
-use FinPulse\Domain\Finance\Indicator;
-
 final class Alert
 {
     public function __construct(
         public readonly string $id,
         public readonly string $userId,
-        public readonly Indicator $indicator,
+        public readonly AlertMetric $indicator,
         public readonly string $operator, // '>' or '<'
         public readonly float $threshold,
         public readonly string $channel,  // 'log' | 'email' | 'whatsapp'

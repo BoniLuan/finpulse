@@ -23,6 +23,8 @@ final class RegisterAction
         $id = $this->registerUser->handle(
             (string) ($body['email'] ?? ''),
             (string) ($body['password'] ?? ''),
+            (string) ($body['display_name'] ?? ''),
+            (string) ($body['phone'] ?? ''),
         );
 
         return $this->json($response, ['id' => $id], 201);

@@ -10,6 +10,8 @@ final class User
         public readonly string $id,
         public readonly string $email,
         public readonly string $passwordHash,
+        public readonly ?string $displayName = null,
+        public readonly ?string $phone = null,
     ) {
     }
 

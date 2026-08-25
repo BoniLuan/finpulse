@@ -5,6 +5,7 @@ import {
   register,
   login,
   me,
+  updateMe,
   listAlerts,
   createAlert,
   deleteAlert,
@@ -14,8 +15,10 @@ import {
 
 const SESSION_HISTORY_KEY = "finpulse_session_history";
 const SESSION_HISTORY_EXPANDED_KEY = "finpulse_history_expanded";
+const SESSION_ALERTS_EXPANDED_KEY = "finpulse_alerts_expanded";
 const THEME_KEY = "finpulse_theme";
 let historyExpanded = sessionStorage.getItem(SESSION_HISTORY_EXPANDED_KEY) === "true";
+let alertsExpanded = sessionStorage.getItem(SESSION_ALERTS_EXPANDED_KEY) === "true";
 
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -37,7 +40,15 @@ function wireTheme() {
   });
 }
 
-const INDICATOR_OPTIONS = ["selic", "cdi", "ipca", "usd", "poupanca"];
+const ALERT_INDICATORS = {
+  selic: "Selic rate",
+  cdi: "CDI rate",
+  ipca: "IPCA inflation",
+  usd: "USD/BRL",
+  poupanca: "Savings yield",
+  btc: "Bitcoin / BRL",
+  eth: "Ethereum / BRL",
+};
 
 // Display config per indicator key (icon, caption, value formatter).
 const DISPLAY = {
@@ -249,20 +260,12 @@ function saveSessionHistory(row) {
   sessionStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(rows));
 }
 
-function syncContextRail() {
-  const rail = $("context-rail");
-  const visible = !$("alerts-section").hidden;
-  rail.hidden = !visible;
-  $("assistant").classList.toggle("no-context", !visible);
-}
-
 async function renderHistoryPanel(loggedIn) {
   const panel = $("history-panel");
   let rows = [];
   try { rows = loggedIn ? (await listHistory()).history : sessionHistory(); }
   catch { rows = []; }
   $("history-section").hidden = rows.length === 0;
-  syncContextRail();
   if (!rows.length) return;
   if (historyExpanded) {
     await loadHistory(loggedIn, rows);
@@ -284,7 +287,6 @@ async function loadHistory(loggedIn, knownRows = null) {
     const rows = knownRows ?? (loggedIn ? (await listHistory()).history : sessionHistory());
     if (!rows.length) {
       $("history-section").hidden = true;
-      syncContextRail();
       return;
     }
     const list = document.createElement("ol");
@@ -330,6 +332,9 @@ async function loadHistory(loggedIn, knownRows = null) {
 const $ = (id) => document.getElementById(id);
 const val = (id) => $(id).value;
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;",
+})[char]);
 const setText = (id, text) => { const e = $(id); if (e) e.textContent = text; };
 function setMsg(id, text, ok = false) {
   const e = $(id);
@@ -345,6 +350,9 @@ async function submitting(btn, label, fn) {
 // ── auth modal ───────────────────────────────────────────────────────────────
 let authMode = "login";
 let registerEmail = "";
+let registerName = "";
+let registerPhone = "";
+let currentUser = null;
 const modal = () => $("auth-modal");
 
 function openAuthModal(mode) {
@@ -410,18 +418,30 @@ async function onLogin(e) {
 function renderRegisterStep1() {
   authMode = "register";
   $("auth-modal-body").innerHTML = modalShell(
-    `<div class="stepper">Step 1 of 2 · Your email</div>` +
+    `<div class="stepper">Step 1 of 2 · Your profile</div>` +
     `<form id="reg1-form" class="modal-form" novalidate>` +
-    `<label>Email<input id="r1-email" type="email" autocomplete="username" placeholder="you@example.com" value="${registerEmail}" /></label>` +
+    `<label>Name or nickname<input id="r1-name" autocomplete="name" placeholder="How should we call you?" value="${escapeHtml(registerName)}" /></label>` +
+    `<p class="field-err" id="r1-name-err"></p>` +
+    `<label>Email<input id="r1-email" type="email" autocomplete="username" placeholder="you@example.com" value="${escapeHtml(registerEmail)}" /></label>` +
     `<p class="field-err" id="r1-email-err"></p>` +
+    `<label>Mobile number <span class="optional">optional · include country code</span><input id="r1-phone" type="tel" autocomplete="tel" placeholder="+55 11 99999-9999" value="${escapeHtml(registerPhone)}" /></label>` +
+    `<p class="field-err" id="r1-phone-err"></p>` +
     `<button type="submit" class="full">Continue →</button></form>`,
   );
   wireShell();
   $("reg1-form").addEventListener("submit", (e) => {
     e.preventDefault();
+    const name = val("r1-name").trim();
     const email = val("r1-email").trim();
+    const phone = val("r1-phone").trim();
+    const phoneDigits = phone.replace(/\D/g, "");
+    setText("r1-name-err", name.length >= 2 ? "" : "Enter at least 2 characters.");
+    setText("r1-phone-err", !phone || (phoneDigits.length >= 10 && phoneDigits.length <= 15) ? "" : "Include country code and 10 to 15 digits.");
     if (!isEmail(email)) { setText("r1-email-err", "Enter a valid email."); return; }
+    if (name.length < 2 || (phone && (phoneDigits.length < 10 || phoneDigits.length > 15))) return;
+    registerName = name;
     registerEmail = email;
+    registerPhone = phone;
     renderRegisterStep2();
   });
 }
@@ -430,7 +450,7 @@ function renderRegisterStep2() {
   $("auth-modal-body").innerHTML = modalShell(
     `<div class="stepper">Step 2 of 2 · Choose a password</div>` +
     `<form id="reg2-form" class="modal-form" novalidate>` +
-    `<p class="muted-line">Creating account for <strong>${registerEmail}</strong></p>` +
+    `<p class="muted-line">Creating account for <strong>${escapeHtml(registerEmail)}</strong></p>` +
     `<label>Password<input id="r2-pass" type="password" autocomplete="new-password" /></label>` +
     `<ul class="pw-reqs"><li id="req-len">At least 8 characters</li></ul>` +
     `<label>Confirm password<input id="r2-confirm" type="password" autocomplete="new-password" /></label>` +
@@ -458,7 +478,7 @@ async function onRegister(e) {
 
   await submitting(e.submitter, "Creating…", async () => {
     try {
-      await register(registerEmail, pass);
+      await register(registerEmail, pass, registerName, registerPhone);
       const { token: t } = await login(registerEmail, pass);
       token.set(t);
       closeAuthModal();
@@ -473,7 +493,9 @@ async function onRegister(e) {
 function renderAuthControls(user) {
   const el = $("auth-controls");
   if (user) {
-    el.innerHTML = `<span class="who">${user.email}</span><button class="ghost" id="nav-logout">Log out</button>`;
+    const profileLabel = user.display_name || user.email;
+    el.innerHTML = `<button class="ghost profile-button" id="nav-profile" title="Profile · ${escapeHtml(profileLabel)}" aria-label="Open profile for ${escapeHtml(profileLabel)}"><span>${escapeHtml(profileLabel)}</span></button><button class="ghost" id="nav-logout">Log out</button>`;
+    $("nav-profile").addEventListener("click", renderProfile);
     $("nav-logout").addEventListener("click", () => { token.clear(); refreshAuthUI(); });
   } else {
     el.innerHTML = `<button class="ghost" id="nav-login">Log in</button><button id="nav-register">Sign up</button>`;
@@ -482,27 +504,54 @@ function renderAuthControls(user) {
   }
 }
 
-function renderAlertsPanel(loggedIn) {
+function renderProfile() {
+  if (!currentUser) return;
+  $("auth-modal-body").innerHTML =
+    `<div class="modal-head"><div><span class="eyebrow">Account</span><h2>Your profile</h2></div><button class="modal-close" id="modal-close" aria-label="Close">×</button></div>` +
+    `<form id="profile-form" class="modal-form" novalidate>` +
+    `<label>Name or nickname<input id="profile-name" autocomplete="name" value="${escapeHtml(currentUser.display_name || "")}" /></label>` +
+    `<label>Email<input value="${escapeHtml(currentUser.email)}" disabled /></label>` +
+    `<label>WhatsApp mobile <span class="optional">optional · include country code</span><input id="profile-phone" type="tel" autocomplete="tel" placeholder="+55 11 99999-9999" value="${escapeHtml(currentUser.phone || "")}" /></label>` +
+    `<p class="form-msg" id="profile-msg"></p><button type="submit" class="full">Save profile</button></form>`;
+  $("modal-close").addEventListener("click", closeAuthModal);
+  $("profile-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await submitting(event.submitter, "Saving…", async () => {
+      try {
+        currentUser = await updateMe(val("profile-name").trim(), val("profile-phone").trim());
+        closeAuthModal();
+        renderAuthControls(currentUser);
+        renderAlertsPanel(currentUser);
+      } catch (error) { setMsg("profile-msg", error.message); }
+    });
+  });
+  modal().showModal();
+}
+
+function renderAlertsPanel(user) {
   const el = $("alerts-panel");
-  if (!loggedIn) {
+  if (!user) {
     $("alerts-section").hidden = true;
     el.replaceChildren();
-    syncContextRail();
     return;
   }
   $("alerts-section").hidden = false;
-  syncContextRail();
   el.innerHTML =
     `<form id="alert-form" class="alert-form">` +
-    `<select id="al-indicator">${INDICATOR_OPTIONS.map((i) => `<option>${i}</option>`).join("")}</select>` +
-    `<select id="al-op"><option value=">">&gt;</option><option value="<">&lt;</option></select>` +
-    `<input id="al-threshold" type="number" step="0.01" placeholder="threshold" />` +
-    `<button type="submit">Add alert</button></form>` +
-    `<div id="alert-history-gate" class="history-gate"><p>Previous alerts are hidden when a session starts.</p>` +
-    `<button id="show-alerts" type="button" class="ghost">Show my alerts</button></div>` +
+    `<label>Market<select id="al-indicator">${Object.entries(ALERT_INDICATORS).map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>` +
+    `<label>Condition<select id="al-op"><option value=">">Rises above</option><option value="<">Falls below</option></select></label>` +
+    `<label>Target value<input id="al-threshold" type="number" step="0.01" placeholder="Enter a value" /></label>` +
+    `<label>Notify by<select id="al-channel"><option value="log">Application log</option><option value="email">Email · ${escapeHtml(user.email)}</option><option value="whatsapp" ${user.phone ? "" : "disabled"}>WhatsApp${user.phone ? ` · +${escapeHtml(user.phone)}` : " · add phone in Profile"}</option></select></label>` +
+    `<button type="submit">Create alert</button></form><p id="alert-form-status" class="form-msg" aria-live="polite"></p>` +
+    `${alertsExpanded ? "" : `<div id="alert-history-gate" class="history-gate"><p>Saved alerts stay hidden until you choose to load them.</p><button id="show-alerts" type="button" class="ghost">Show saved alerts</button></div>`}` +
     `<ul id="alert-list" class="alert-list"></ul>`;
   $("alert-form").addEventListener("submit", onCreateAlert);
-  $("show-alerts").addEventListener("click", loadAlerts);
+  if (alertsExpanded) loadAlerts();
+  else $("show-alerts").addEventListener("click", () => {
+    alertsExpanded = true;
+    sessionStorage.setItem(SESSION_ALERTS_EXPANDED_KEY, "true");
+    loadAlerts();
+  });
 }
 
 async function onCreateAlert(e) {
@@ -514,10 +563,11 @@ async function onCreateAlert(e) {
       indicator: val("al-indicator"),
       operator: val("al-op"),
       threshold,
-      channel: "log",
+      channel: val("al-channel"),
     });
     $("al-threshold").value = "";
-    loadAlerts();
+    setMsg("alert-form-status", "Alert created.", true);
+    if (alertsExpanded) loadAlerts();
   } catch (err) {
     $("al-threshold").value = "";
     $("al-threshold").placeholder = err.message;
@@ -531,6 +581,23 @@ async function loadAlerts() {
   if (gate) gate.remove();
   try {
     const { alerts } = await listAlerts();
+    let toolbar = $("alert-list-toolbar");
+    if (!toolbar) {
+      toolbar = document.createElement("div");
+      toolbar.id = "alert-list-toolbar";
+      toolbar.className = "history-toolbar";
+      const hide = document.createElement("button");
+      hide.type = "button";
+      hide.className = "ghost";
+      hide.textContent = "Hide saved alerts";
+      hide.addEventListener("click", () => {
+        alertsExpanded = false;
+        sessionStorage.removeItem(SESSION_ALERTS_EXPANDED_KEY);
+        renderAlertsPanel(currentUser);
+      });
+      toolbar.appendChild(hide);
+      list.before(toolbar);
+    }
     if (!alerts.length) {
       list.innerHTML = `<li class="empty">No alerts yet — add one above.</li>`;
       return;
@@ -538,7 +605,8 @@ async function loadAlerts() {
     list.innerHTML = "";
     for (const a of alerts) {
       const li = document.createElement("li");
-      li.innerHTML = `<span><strong>${a.indicator.toUpperCase()}</strong> ${a.operator} ${a.threshold}</span>`;
+      const condition = a.operator === ">" ? "rises above" : "falls below";
+      li.innerHTML = `<span><strong>${ALERT_INDICATORS[a.indicator] || a.indicator.toUpperCase()}</strong> ${condition} ${a.threshold} <small>via ${a.channel}</small></span>`;
       const del = document.createElement("button");
       del.className = "ghost";
       del.textContent = "Delete";
@@ -553,6 +621,7 @@ async function loadAlerts() {
 
 async function refreshAuthUI() {
   if (!token.get()) {
+    currentUser = null;
     renderAuthControls(null);
     renderAlertsPanel(false);
     await renderHistoryPanel(false);
@@ -560,11 +629,13 @@ async function refreshAuthUI() {
   }
   try {
     const user = await me();
+    currentUser = user;
     renderAuthControls(user);
-    renderAlertsPanel(true);
+    renderAlertsPanel(user);
     await renderHistoryPanel(true);
   } catch {
     token.clear();
+    currentUser = null;
     renderAuthControls(null);
     renderAlertsPanel(false);
     await renderHistoryPanel(false);

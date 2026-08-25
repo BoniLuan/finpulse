@@ -7,8 +7,8 @@ namespace FinPulse\Tests\Integration;
 use FinPulse\Application\Alert\DeleteAlert;
 use FinPulse\Application\Alert\ListAlerts;
 use FinPulse\Domain\Alert\Alert;
+use FinPulse\Domain\Alert\AlertMetric;
 use FinPulse\Domain\Alert\AlertRepository;
-use FinPulse\Domain\Finance\Indicator;
 use PHPUnit\Framework\TestCase;
 
 final class UserAlertsTest extends TestCase
@@ -18,14 +18,14 @@ final class UserAlertsTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('channel must be');
 
-        new Alert('a1', 'user-1', Indicator::USD, '>', 5.0, 'unknown');
+        new Alert('a1', 'user-1', AlertMetric::USD, '>', 5.0, 'unknown');
     }
 
     public function testListReturnsOnlyTheUsersAlerts(): void
     {
         $repo = new InMemoryAlertRepository();
-        $repo->save(new Alert('a1', 'user-1', Indicator::USD, '>', 5.0, 'log'));
-        $repo->save(new Alert('a2', 'user-2', Indicator::SELIC, '<', 10.0, 'log'));
+        $repo->save(new Alert('a1', 'user-1', AlertMetric::USD, '>', 5.0, 'log'));
+        $repo->save(new Alert('a2', 'user-2', AlertMetric::SELIC, '<', 10.0, 'log'));
 
         $list = (new ListAlerts($repo))->handle('user-1');
 
@@ -37,7 +37,7 @@ final class UserAlertsTest extends TestCase
     public function testDeleteOnlyRemovesOwnedAlert(): void
     {
         $repo = new InMemoryAlertRepository();
-        $repo->save(new Alert('a1', 'user-1', Indicator::USD, '>', 5.0, 'log'));
+        $repo->save(new Alert('a1', 'user-1', AlertMetric::USD, '>', 5.0, 'log'));
         $delete = new DeleteAlert($repo);
 
         self::assertFalse($delete->handle('a1', 'user-2')); // not the owner
