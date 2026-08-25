@@ -13,8 +13,9 @@ import {
 } from "./api.js";
 
 const SESSION_HISTORY_KEY = "finpulse_session_history";
+const SESSION_HISTORY_EXPANDED_KEY = "finpulse_history_expanded";
 const THEME_KEY = "finpulse_theme";
-let historyExpanded = false;
+let historyExpanded = sessionStorage.getItem(SESSION_HISTORY_EXPANDED_KEY) === "true";
 
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -271,6 +272,7 @@ async function renderHistoryPanel(loggedIn) {
     `<button id="show-history" class="ghost">Show history</button></div>`;
   $("show-history").addEventListener("click", () => {
     historyExpanded = true;
+    sessionStorage.setItem(SESSION_HISTORY_EXPANDED_KEY, "true");
     loadHistory(loggedIn, rows);
   });
 }
@@ -306,7 +308,19 @@ async function loadHistory(loggedIn, knownRows = null) {
       item.append(text, del);
       list.appendChild(item);
     }
-    panel.replaceChildren(list);
+    const toolbar = document.createElement("div");
+    toolbar.className = "history-toolbar";
+    const hide = document.createElement("button");
+    hide.type = "button";
+    hide.className = "ghost";
+    hide.textContent = "Hide history";
+    hide.addEventListener("click", () => {
+      historyExpanded = false;
+      sessionStorage.removeItem(SESSION_HISTORY_EXPANDED_KEY);
+      renderHistoryPanel(loggedIn);
+    });
+    toolbar.appendChild(hide);
+    panel.replaceChildren(toolbar, list);
   } catch (err) {
     panel.textContent = err.message;
   }

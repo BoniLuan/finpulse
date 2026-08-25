@@ -10,7 +10,8 @@
   --ring: rgba(99, 102, 241, 0.25);
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
   --radius: 16px;
-  --page-tint: rgba(247, 249, 252, 0.76);
+  --page-background: url("/assets/page-background-light.png");
+  --page-tint: rgba(247, 249, 252, 0.74);
   --content-gutter: max(clamp(0.75rem, 2vw, 3rem), calc((100vw - 2200px) / 2));
 }
 
@@ -24,7 +25,8 @@
   --line: #293449;
   --ring: rgba(129, 140, 248, 0.35);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.2);
-  --page-tint: rgba(5, 10, 25, 0.32);
+  --page-background: url("/assets/page-background.png");
+  --page-tint: rgba(5, 10, 25, 0.64);
 }
 
 * { box-sizing: border-box; }
@@ -36,17 +38,8 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
   line-height: 1.55;
-  background:
-    radial-gradient(60rem 60rem at 110% -10%, #ede9fe 0%, transparent 50%),
-    radial-gradient(50rem 50rem at -10% 0%, #e0f2fe 0%, transparent 45%),
-    var(--bg);
+  background-color: var(--bg);
   min-height: 100vh;
-}
-:root[data-theme="dark"] body {
-  background:
-    radial-gradient(60rem 60rem at 110% -10%, #24164a 0%, transparent 50%),
-    radial-gradient(50rem 50rem at -10% 0%, #102a43 0%, transparent 45%),
-    var(--bg);
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────── */
@@ -340,6 +333,8 @@ button:disabled { opacity: 0.6; cursor: default; transform: none; }
 
 .history-gate { text-align: center; color: var(--muted); }
 .history-gate p, .history-empty { margin: 0 0 0.8rem; }
+.history-toolbar { display: flex; justify-content: flex-end; margin-bottom: 0.75rem; }
+.history-toolbar button { padding: 0.45rem 0.75rem; }
 .history-list { list-style: none; display: grid; gap: 0.75rem; margin: 0; padding: 0; max-height: min(34rem, 60vh); overflow-y: auto; overscroll-behavior: contain; }
 .history-list li {
   display: flex;
@@ -375,9 +370,9 @@ body {
   background-color: var(--bg);
   background-image:
     linear-gradient(var(--page-tint), var(--page-tint)),
-    url("/assets/page-background.png");
+    var(--page-background);
   background-position: center, center top;
-  background-size: auto, 100% auto;
+  background-size: auto, 100% 100vh;
   background-attachment: fixed, fixed;
   background-repeat: no-repeat, no-repeat;
 }
@@ -482,7 +477,7 @@ main.dashboard {
 @media (max-width: 560px) {
   body {
     background-position: center, 62% top;
-    background-size: auto, auto 100svh;
+    background-size: auto, 100% 100svh;
   }
   .topbar { padding: 0.6rem var(--content-gutter); }
   .auth-controls .who { display: none; }

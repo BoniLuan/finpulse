@@ -4,7 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FinPulse — financial assistant with BACEN data + AI</title>
-    <link rel="preload" href="/assets/page-background.png" as="image" fetchpriority="high" />
+    <script>
+      try {
+        const savedTheme = localStorage.getItem("finpulse_theme");
+        document.documentElement.dataset.theme = savedTheme ||
+          (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      } catch { /* Use the light theme when browser storage is unavailable. */ }
+    </script>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>

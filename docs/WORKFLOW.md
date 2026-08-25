@@ -74,13 +74,14 @@ Check items off as they land. Add new items here before starting them.
 - [ ] OpenAPI spec + Swagger UI; generate `api.md` from it.
 - [ ] Observability profile: Prometheus + Grafana (`docker compose --profile observability`).
 - [ ] End-to-end test (spin the stack, hit `/ask`, assert).
-- [x] Conversation history: session-only for guests, persistent for authenticated users, with row deletion.
+- [x] Conversation history: session-only for guests, persistent for authenticated
+      users, with row deletion and a session-persisted show/hide preference.
 - [x] Progressive account panels: do not load previous alerts or history until requested.
 - [x] Persistent light/dark theme switch.
 - [x] More free live indicators: cached BTC/BRL and ETH/BRL spot prices.
 - [x] Responsive dashboard refresh: wider desktop layout, contextual side rail,
-      mobile indicator carousel, continuous generated market artwork, and a
-      rotating question-suggestion carousel.
+      mobile indicator carousel, theme-specific continuous generated market
+      artwork, and a rotating question-suggestion carousel.
 - [x] Browser-native voice dictation for the question field, with graceful
       fallback when speech recognition is unavailable.
 
@@ -97,7 +98,8 @@ The default `docker compose` command automatically loads
 `docker-compose.override.yml`. Application source is bind-mounted for fast
 development feedback: web changes need only a browser refresh, the AI worker
 reloads automatically, and PHP source is immediately available in the API
-container.
+container. Unversioned CSS and JavaScript revalidate on refresh, while large
+static assets retain a browser cache.
 
 Use `make rebuild-affected` after changes. It runs relevant tests and rebuilds
 only when a Dockerfile, dependency manifest, Nginx configuration, Compose file,
