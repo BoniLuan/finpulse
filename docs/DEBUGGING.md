@@ -1,7 +1,6 @@
 # Step debugging the api (Xdebug)
 
-The api runs as **php-fpm inside Docker**. Xdebug 3 is built into the image and
-turned on in dev via `XDEBUG_MODE=debug` (see `compose.dev.yml`).
+The api runs as **php-fpm inside Docker**. Xdebug 3 is installed only in the development image and enabled via `XDEBUG_MODE=debug` (see `compose.dev.yml`).
 It connects back to your editor on **port 9003**.
 
 ## One-time setup
@@ -22,9 +21,12 @@ It connects back to your editor on **port 9003**.
 2. Set breakpoints, e.g. in `src/Infrastructure/Bacen/BacenClient.php`
    (`fetch()` = the actual BACEN HTTP call) and in
    `src/Application/Ask/AskQuestion.php` (`handle()`).
-3. Trigger a request: open <http://localhost:8080> and ask, or
-   ```
-   curl -X POST http://localhost:8080/api/v1/ask -H "Content-Type: application/json" \
+3. Sign in through the web UI, copy its JWT for debugging, and trigger a request:
+   ```sh
+   TOKEN="paste-the-development-jwt-here"
+   curl -X POST http://localhost:8080/api/v1/ask \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: application/json" \
         -d "{\"question\":\"what is the current selic?\"}"
    ```
 
@@ -32,7 +34,8 @@ It connects back to your editor on **port 9003**.
 
 ```
 public/index.php
-  → RateLimitMiddleware → JsonErrorMiddleware
+  → RateLimitMiddleware → JsonErrorMiddleware → JwtAuthMiddleware
+  → AiRateLimitMiddleware
   → AskAction::__invoke
     → AskQuestion::handle
       → AiWorkerClient::parse        (HTTP → ai-worker: intent)

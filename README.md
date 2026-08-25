@@ -11,7 +11,7 @@ USD data. You can also register alerts (e.g. *notify me when the dollar passes
 
 It is a portfolio project built to demonstrate **backend architecture, Docker,
 databases, authentication, API integrations, AI, automated tests, CI/CD and
-observability**
+observability**.
 
 ---
 
@@ -26,7 +26,7 @@ Nginx gateway.
                                   HTTP ─────────┘     ├──▶ PostgreSQL 16
                                   ▼                   └──▶ Redis 7 (cache/queue/ratelimit)
                        ai-worker (Python 3.12 + FastAPI)
-                       LLM behind a pluggable provider (Gemini default)
+                       LLM provider selected by env (fake or Gemini)
 ```
 
 - **`services/api`** — PHP 8.3 + Slim 4, clean architecture. Owns business logic
@@ -34,7 +34,7 @@ Nginx gateway.
   caching, the calculation engine, alerts, and outbound channels.
 - **`services/ai-worker`** — Python 3.12 + FastAPI. AI only: parses natural
   language into intents and writes plain-language answers, behind a pluggable
-  `LLMProvider` (default **Gemini**, swappable to Claude/OpenAI via env).
+  `LLMProvider` (`fake` by default; Gemini available via env).
 - **`services/web`** — static HTML/CSS/JS (ES modules, no build step), served by
   Nginx. Intentionally thin UI: landing page, live indicators widget, and a chat
   box. The backend is the star.
@@ -60,7 +60,8 @@ make dev-up               # start the development stack
 make migrate              # create the database schema
 ```
 
-Then open <http://localhost:8080> and try the chat box.
+Then open <http://localhost:8080>, create an account, sign in, and try the
+chat box.
 
 To use real AI, set `LLM_PROVIDER=gemini` and `GEMINI_API_KEY=...` in `.env`
 (Gemini has a free tier). With `LLM_PROVIDER=fake` (the default) the worker
@@ -77,6 +78,11 @@ credentials**.
 | `make verify` | test services affected by current changes |
 | `make rebuild-affected` | verify and rebuild only affected images |
 | `make logs` | tail all service logs |
+
+Production uses only `docker-compose.yml`, publishes no FinPulse host ports, and
+expects the external `web-proxy` network used by the public reverse proxy. Create
+it once with `docker network create web-proxy`. Development explicitly merges
+`compose.dev.yml`; all of its published ports bind to `127.0.0.1`.
 
 ---
 

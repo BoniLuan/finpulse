@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace FinPulse\Infrastructure\Cache;
 
+use FinPulse\Application\Port\RateLimitCounter;
 use Predis\Client;
 
 /** Thin cache facade over Predis with a get-or-compute helper. */
-final class RedisCache
+final class RedisCache implements RateLimitCounter
 {
     public function __construct(private readonly Client $redis)
     {

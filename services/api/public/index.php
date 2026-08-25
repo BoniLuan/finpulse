@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use FinPulse\Http\Middleware\JsonErrorMiddleware;
+use FinPulse\Application\Port\RateLimitCounter;
 use FinPulse\Http\Middleware\RateLimitMiddleware;
-use FinPulse\Infrastructure\Cache\RedisCache;
 use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 
@@ -24,7 +24,7 @@ $app->addRoutingMiddleware();
 
 // Global middleware (executed bottom-up): rate limit → JSON errors.
 $app->add(new RateLimitMiddleware(
-    $container->get(RedisCache::class),
+    $container->get(RateLimitCounter::class),
     $settings['rate_limit']['max'],
     $settings['rate_limit']['window'],
 ));

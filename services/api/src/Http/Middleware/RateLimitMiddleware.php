@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FinPulse\Http\Middleware;
 
-use FinPulse\Infrastructure\Cache\RedisCache;
+use FinPulse\Application\Port\RateLimitCounter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -15,7 +15,7 @@ use Slim\Psr7\Response;
 final class RateLimitMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly RedisCache $cache,
+        private readonly RateLimitCounter $counter,
         private readonly int $max,
         private readonly int $window,
     ) {
@@ -27,7 +27,7 @@ final class RateLimitMiddleware implements MiddlewareInterface
             ?: ($request->getServerParams()['REMOTE_ADDR'] ?? 'unknown');
         $key = 'ratelimit:' . $ip;
 
-        $count = $this->cache->incrementWithWindow($key, $this->window);
+        $count = $this->counter->incrementWithWindow($key, $this->window);
         if ($count > $this->max) {
             $response = new Response();
             $response->getBody()->write(json_encode([

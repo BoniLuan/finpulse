@@ -6,6 +6,9 @@ services:
       - "127.0.0.1:8080:80"
 
   api:
+    build:
+      context: ./services/api
+      target: development
     environment:
       APP_ENV: dev
       APP_DEBUG: "true"
@@ -14,11 +17,22 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ./services/api:/var/www/html
+      - ./services/api/bin:/var/www/html/bin:ro
+      - ./services/api/config:/var/www/html/config:ro
+      - ./services/api/migrations:/var/www/html/migrations:ro
+      - ./services/api/public:/var/www/html/public:ro
+      - ./services/api/src:/var/www/html/src:ro
+      - ./services/api/tests:/var/www/html/tests:ro
 
   scheduler:
+    build:
+      context: ./services/api
+      target: development
     volumes:
-      - ./services/api:/var/www/html
+      - ./services/api/bin:/var/www/html/bin:ro
+      - ./services/api/config:/var/www/html/config:ro
+      - ./services/api/migrations:/var/www/html/migrations:ro
+      - ./services/api/src:/var/www/html/src:ro
 
   ai-worker:
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
@@ -47,3 +61,8 @@ services:
     ports:
       - "127.0.0.1:8025:8025" # Mailpit web UI: captured alert emails
       - "127.0.0.1:1025:1025" # SMTP
+
+networks:
+  web-proxy:
+    name: finpulse-dev-web-proxy
+    external: false

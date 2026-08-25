@@ -16,7 +16,8 @@ output — a `response_schema` with `response_mime_type="application/json"`.
 
 Use **`google-genai`**. For `parse_intent`, request schema-enforced JSON (a flat
 Pydantic model mapped to `{type, params}`); for `explain`, request plain text.
-Default model: **`gemini-2.5-flash`**. On any SDK/parse error, fall back to the
+Default model: **`gemini-3.5-flash-lite`**. Each SDK call has a 15-second
+timeout and a 512-token output cap. On any SDK/parse error, fall back to the
 `fake` provider so the request still succeeds.
 
 ## Consequences

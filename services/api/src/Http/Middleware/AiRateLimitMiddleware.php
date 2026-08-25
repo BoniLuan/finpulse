@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FinPulse\Http\Middleware;
 
-use FinPulse\Infrastructure\Cache\RedisCache;
+use FinPulse\Application\Port\RateLimitCounter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -15,7 +15,7 @@ use Slim\Psr7\Response;
 final class AiRateLimitMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly RedisCache $cache,
+        private readonly RateLimitCounter $counter,
         private readonly int $max,
         private readonly int $window,
         private readonly int $dailyMax,
@@ -30,7 +30,7 @@ final class AiRateLimitMiddleware implements MiddlewareInterface
         }
 
         $identity = hash('sha256', $userId);
-        $minuteCount = $this->cache->incrementWithWindow(
+        $minuteCount = $this->counter->incrementWithWindow(
             'ratelimit:ai:minute:' . $identity,
             $this->window,
         );
@@ -38,7 +38,7 @@ final class AiRateLimitMiddleware implements MiddlewareInterface
             return $this->rateLimited($this->window, 'AI request limit exceeded; try again shortly');
         }
 
-        $dailyCount = $this->cache->incrementWithWindow(
+        $dailyCount = $this->counter->incrementWithWindow(
             'ratelimit:ai:daily:' . $identity,
             86400,
         );

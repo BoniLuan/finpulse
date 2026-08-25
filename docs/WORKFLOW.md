@@ -74,8 +74,8 @@ Check items off as they land. Add new items here before starting them.
 - [ ] OpenAPI spec + Swagger UI; generate `api.md` from it.
 - [ ] Observability profile: Prometheus + Grafana (`docker compose --profile observability`).
 - [ ] End-to-end test (spin the stack, hit `/ask`, assert).
-- [x] Conversation history: session-only for guests, persistent for authenticated
-      users, with row deletion and a session-persisted show/hide preference.
+- [x] Authenticated conversation history with row deletion and a
+      session-persisted show/hide preference.
 - [x] Progressive account panels: session-persisted show/hide controls for history
       and authenticated alerts, without fetching hidden records.
 - [x] Flexible alert builder: readable conditions, delivery selection, and
@@ -101,19 +101,20 @@ See `CLAUDE.md` for the full list. The essentials:
 
 The base `docker compose` command loads only `docker-compose.yml` and is safe for
 production. Development explicitly adds `compose.dev.yml`. Application source is
-bind-mounted for fast
-development feedback: web changes need only a browser refresh, the AI worker
-reloads automatically, and PHP source is immediately available in both the API
-and scheduler containers. Unversioned CSS and JavaScript revalidate on refresh,
+bind-mounted for fast development feedback: web changes need only a browser
+refresh, while the AI worker reloads automatically. PHP source is immediately
+available in both the API and scheduler containers. Unversioned CSS and JavaScript revalidate on refresh,
 while large static assets retain a browser cache.
 
 Start development with `make dev-up`, then use `make rebuild-affected` after
-changes. It runs relevant tests and rebuilds
-only when a Dockerfile, dependency manifest, Nginx configuration, Compose file,
-or other image input changed. Web changes receive JavaScript syntax and HTTP
-smoke checks without an image rebuild. Use `make dev-build` for an intentional full development rebuild.
+changes. It runs relevant tests and rebuilds only when a Dockerfile, dependency
+manifest, Nginx configuration, Compose file, or other image input changed. Web
+changes receive JavaScript syntax and HTTP smoke checks without an image rebuild.
+Use `make dev-build` for an intentional full development rebuild.
 
-Production runs use only immutable images:
+Production runs use only immutable images. Copy `.env.example` to `.env`, set
+strong production credentials, and create the shared network once with
+`docker network create web-proxy` before the first start:
 
 ```sh
 docker compose -f docker-compose.yml up -d --build

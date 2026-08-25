@@ -4,11 +4,11 @@ name: finpulse
 x-api-env: &api-env
   APP_ENV: prod
   APP_DEBUG: "false"
-  DATABASE_DSN: ${DATABASE_DSN}
-  DATABASE_USER: ${DATABASE_USER}
-  DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-  REDIS_URL: ${REDIS_URL}
-  JWT_SECRET: ${JWT_SECRET}
+  DATABASE_DSN: ${DATABASE_DSN:?Set DATABASE_DSN in .env}
+  DATABASE_USER: ${DATABASE_USER:?Set DATABASE_USER in .env}
+  DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+  REDIS_URL: ${REDIS_URL:?Set REDIS_URL in .env}
+  JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
   JWT_TTL: ${JWT_TTL:-3600}
   RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
   RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60}
@@ -86,7 +86,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-finpulse}
       POSTGRES_USER: ${POSTGRES_USER:-finpulse}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-finpulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:

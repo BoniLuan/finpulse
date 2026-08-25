@@ -19,6 +19,7 @@ use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\IntentParser;
 use FinPulse\Application\Port\NotificationChannel;
 use FinPulse\Application\Port\QueryLogRepository;
+use FinPulse\Application\Port\RateLimitCounter;
 use FinPulse\Application\Port\TokenIssuer;
 use FinPulse\Domain\Alert\AlertRepository;
 use FinPulse\Domain\User\UserRepository;
@@ -74,9 +75,11 @@ return static function (ContainerBuilder $builder): void {
         RedisClient::class => static fn (): RedisClient => new RedisClient($settings['redis']['url']),
         RedisCache::class => static fn (ContainerInterface $c): RedisCache
             => new RedisCache($c->get(RedisClient::class)),
+        RateLimitCounter::class => static fn (ContainerInterface $c): RateLimitCounter
+            => $c->get(RedisCache::class),
         AiRateLimitMiddleware::class => static fn (ContainerInterface $c): AiRateLimitMiddleware
             => new AiRateLimitMiddleware(
-                $c->get(RedisCache::class),
+                $c->get(RateLimitCounter::class),
                 $settings['ai_rate_limit']['max'],
                 $settings['ai_rate_limit']['window'],
                 $settings['ai_rate_limit']['daily_max'],

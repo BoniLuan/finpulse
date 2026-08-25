@@ -22,7 +22,7 @@ If code and docs disagree, that is a bug to fix, not a state to leave.
 
 ## Architecture (monorepo, Docker Compose)
 - `services/api` — PHP 8.3 + Slim 4, clean architecture. Business + orchestration.
-- `services/ai-worker` — Python 3.12 + FastAPI. AI only, behind a pluggable LLM provider (Gemini default).
+- `services/ai-worker` — Python 3.12 + FastAPI. AI only, behind a pluggable LLM provider (fake by default; Gemini in production).
 - `services/web` — static HTML/CSS/JS (ES modules, no build step), served by Nginx. Thin UI: landing, live indicators, chat.
 - `infra/gateway` — Nginx reverse proxy (single entry point).
 - PostgreSQL 16 (data) · Redis 7 (cache + queue + rate limit).
@@ -38,8 +38,8 @@ Dependencies point inward; Domain has no framework/IO imports.
 - `make up` / `make down` — start / stop production
 - `make dev-up` / `make dev-down` — start / stop development
 - `make migrate` / `make seed` — DB schema / sample data
-- `make test` — PHPUnit + pytest + web tests
-- `make lint` — php-cs-fixer + phpstan + ruff + mypy + eslint
+- `make test` — PHPUnit + pytest
+- `make lint` — php-cs-fixer + phpstan + ruff + mypy
 - `make verify` — test services affected by uncommitted changes
 - `make rebuild-affected` — verify and rebuild only affected images
 - Production: `docker compose -f docker-compose.yml up -d --build`

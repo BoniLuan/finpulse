@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
           extensions: pdo, pdo_pgsql
           tools: composer:v2
       - name: Install dependencies
-        run: composer update --no-interaction --no-progress --prefer-dist
+        run: composer install --no-interaction --no-progress --prefer-dist
       - name: Static analysis
         run: vendor/bin/phpstan analyse --no-progress
       - name: Code style
@@ -69,4 +69,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build all images
+        env:
+          DATABASE_DSN: "pgsql:host=db;port=5432;dbname=finpulse"
+          DATABASE_USER: finpulse
+          DATABASE_PASSWORD: finpulse-ci
+          REDIS_URL: "tcp://redis:6379"
+          JWT_SECRET: ci-only-secret-at-least-32-characters
+          POSTGRES_PASSWORD: finpulse-ci
         run: docker compose -f docker-compose.yml build

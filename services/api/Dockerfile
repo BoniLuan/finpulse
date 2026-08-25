@@ -1,12 +1,17 @@
-# ── Stage 1: composer dependencies ────────────────────────────────────────────
-FROM composer:2 AS vendor
+# ── Composer dependencies ───────────────────────────────────────────────────
+FROM composer:2 AS vendor-production
 WORKDIR /app
-COPY composer.json composer.lock* ./
-RUN composer install --no-scripts --no-interaction --prefer-dist --no-progress || \
-    composer update --no-scripts --no-interaction --prefer-dist --no-progress
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist \
+    --no-progress --optimize-autoloader
 
-# ── Stage 2: runtime (php-fpm) ────────────────────────────────────────────────
-FROM php:8.3-fpm-alpine
+FROM composer:2 AS vendor-development
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-scripts --no-interaction --prefer-dist --no-progress
+
+# ── Shared PHP runtime ────────────────────────────────────────────────────────
+FROM php:8.3-fpm-alpine AS runtime
 
 # pdo_pgsql needs libpq at runtime and build tools to compile.
 # Redis is reached via predis (pure PHP), so no C extension is required.
@@ -15,20 +20,23 @@ RUN apk add --no-cache postgresql-libs \
     && docker-php-ext-install pdo pdo_pgsql \
     && apk del .build-deps
 
-# Xdebug for step debugging. The extension is always installed but stays OFF
-# unless XDEBUG_MODE=debug is set (done in compose.dev.yml for dev),
-# so production is unaffected.
+WORKDIR /var/www/html
+EXPOSE 9000
+CMD ["php-fpm"]
+
+# ── Development image ────────────────────────────────────────────────────────
+FROM runtime AS development
 RUN apk add --no-cache --virtual .xdebug-deps $PHPIZE_DEPS linux-headers \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     && apk del .xdebug-deps
 COPY docker/xdebug.ini /usr/local/etc/php/conf.d/zz-xdebug.ini
-
-WORKDIR /var/www/html
-COPY --from=vendor /app/vendor ./vendor
-COPY --from=vendor /usr/bin/composer /usr/local/bin/composer
+COPY --from=vendor-development /app/vendor ./vendor
+COPY --from=vendor-development /usr/bin/composer /usr/local/bin/composer
 COPY . .
 
-# php-fpm listens on 9000; the gateway connects via FastCGI.
-EXPOSE 9000
-CMD ["php-fpm"]
+# ── Production image (default target) ────────────────────────────────────────
+FROM runtime AS production
+COPY docker/production.ini /usr/local/etc/php/conf.d/zz-production.ini
+COPY --from=vendor-production /app/vendor ./vendor
+COPY . .

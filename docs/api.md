@@ -1,6 +1,6 @@
 # API reference
 
-Base URL (through the gateway): `http://localhost/api/v1`
+Base URL (development gateway): `http://localhost:8080/api/v1`
 
 All responses are JSON. Errors use the shape:
 
@@ -41,6 +41,7 @@ indicators widget.
 
 ```
 POST /api/v1/ask
+Authorization: Bearer <token>
 Content-Type: application/json
 
 { "question": "how much does 10 thousand in savings yield in 1 year?" }
@@ -58,15 +59,19 @@ Response:
 }
 ```
 
-The bearer token is optional. When valid, the completed question and answer are
-attached to that user and become available through the history endpoints.
-Anonymous questions are not retained by the API.
+A valid bearer token is required. The completed question and answer are attached
+to the authenticated user and become available through the history endpoints.
+The `question` field must contain between 1 and 1,000 bytes.
 
 Supported intents: `indicator_value`, `investment_return` (savings, Tesouro
 Selic, or CDB — pass `indicator: cdi` with `percent_of_cdi` for "% of CDI"),
 and `inflation_correction`.
 
-Rate limited per client IP (see `RATE_LIMIT_*`). Returns `429` when exceeded.
+All API traffic is limited per client IP by `RATE_LIMIT_*` (60 requests per 60
+seconds by default). In addition, this endpoint is limited per authenticated user
+by `AI_RATE_LIMIT_*` (5 questions per 60 seconds) and `AI_DAILY_LIMIT` (50
+questions per 24-hour fixed window). A rejected request returns `429` with a
+`Retry-After` header. One accepted question can generate up to two provider calls.
 
 ## Auth
 
@@ -97,12 +102,12 @@ DELETE /api/v1/alerts/{id}       → 204 on success, 404 if not found / not owne
 `channel` is one of `log`, `email`, or `whatsapp`. Stored alerts are evaluated
 automatically by the `scheduler` service (which runs `php bin/console
 alerts:check` on an interval) and dispatched through that channel, with a
-  per-alert cooldown to avoid repeat notifications. An unsupported channel is
-  rejected with `400`.
+per-alert cooldown to avoid repeat notifications. An unsupported channel is
+rejected with `400`.
 
-  `indicator` accepts `selic`, `cdi`, `ipca`, `usd`, `poupanca`, `btc`, or
-  `eth`. The first five use cached BACEN data; BTC and ETH use cached BRL spot
-  prices from Coinbase. Operators remain `>` and `<` in the HTTP contract, but
+`indicator` accepts `selic`, `cdi`, `ipca`, `usd`, `poupanca`, `btc`, or
+`eth`. The first five use cached BACEN data; BTC and ETH use cached BRL spot
+prices from Coinbase. Operators remain `>` and `<` in the HTTP contract, but
   the web interface presents them as “rises above” and “falls below.”
 
 ### Conversation history
@@ -114,5 +119,4 @@ GET    /api/v1/history       → 200 { "history": [ { id, question, answer, sour
 DELETE /api/v1/history/{id}  → 204 on success, 404 if not found / not owned
 ```
 
-Guest history is intentionally a frontend concern and remains in browser
-`sessionStorage` only.
+The web client exposes question history only to authenticated users.

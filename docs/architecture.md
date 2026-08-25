@@ -15,7 +15,7 @@ orchestration; Python owns AI; the frontend is thin.**
   └───────────┘         │  auth · alerts · calc │      │  provider iface   │
                         │  BACEN client · queue │      └────────┬─────────┘
                         └───┬───────────┬───────┘               │
-                            │           │                  Gemini│/Claude/OpenAI
+                            │           │                  Gemini│ or fake
                      ┌──────▼─────┐ ┌───▼────┐              (env-selected)
                      │ PostgreSQL │ │ Redis  │  cache · queue · ratelimit
                      └────────────┘ └────────┘
@@ -28,12 +28,14 @@ orchestration; Python owns AI; the frontend is thin.**
 
 | Service | Tech | Responsibility |
 |---|---|---|
-| `gateway` | Nginx | Single public entry; routes `/api`, `/ai` (internal), `/` to web. |
+| `gateway` | Nginx | Single public entry; routes `/api/*` to PHP-FPM and `/*` to the web SPA. |
 | `api` | PHP 8.3 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
 | `web` | static HTML/CSS/JS (ES modules, no build) | Responsive dashboard, live indicator carousel, chat, contextual history/alerts, and a theme-aware market background. |
 | `db` | PostgreSQL 16 | User profiles/contact destinations, alerts, and authenticated conversation history/query logs. |
-| `redis` | Redis 7 | BACEN series cache, simple job queue, rate-limit counters. |
+| `redis` | Redis 7 | BACEN/market cache, alert cooldowns, and rate-limit counters. |
+| `scheduler` | PHP 8.3 CLI | Evaluates stored alerts on a configured interval. |
+| `mailpit` | Mailpit | Internal SMTP sink used until a real SMTP service is configured; UI is exposed only in development. |
 
 The gateway resolves `api` and `web` through Docker's embedded DNS with a short
 TTL. Rebuilding either upstream can change its container IP without requiring a
@@ -55,21 +57,20 @@ interfaces declared by `Domain`/`Application`; the DI container wires them in
 
 ## Data flow — "ask a question" (the implemented vertical slice)
 
-1. `web` chat box → `POST /api/v1/ask { question }` via the gateway.
-2. `api` `RateLimit` middleware checks Redis → `AskQuestion` use case runs.
+1. An authenticated `web` chat box sends `POST /api/v1/ask { question }`
+   through the gateway.
+2. The API validates the JWT, applies global per-IP and AI per-user Redis quotas,
+   then runs the `AskQuestion` use case.
 3. Use case calls `ai-worker` `POST /infer/intent` → `{ type, params }`
    (`indicator_value` | `investment_return` | `inflation_correction`).
 4. `BacenClient` fetches the needed SGS series (Redis-cached; live HTTP on miss).
 5. A `Domain` service computes the result
    (`InvestmentCalculator` / `InflationCorrector`).
 6. Use case calls `ai-worker` `POST /infer/explain` → plain-language answer.
-7. With an optional valid JWT, a `query_logs` row is persisted and attached to
-   that user as conversation history. Anonymous questions are not persisted by
-   the API. The API returns `{ id, answer, data, sources }`.
+7. A `query_logs` row is persisted for the authenticated user. The API returns `{ id, answer, data, sources }`.
 
-The static web client stores anonymous conversation history in
-`sessionStorage`. Authenticated history is read and deleted through user-scoped
-API routes. History and alerts are loaded only after an explicit user action;
+Conversation history is read and deleted through authenticated, user-scoped API
+routes. History and alerts are loaded only after an explicit user action;
 their expanded preference is then retained for the current browser-tab session.
 
 The live-indicators use case combines BACEN SGS economic series with BTC/BRL
@@ -98,3 +99,5 @@ See the ADRs:
 - [0005 — Gemini via the google-genai SDK with schema JSON](adr/0005-gemini-genai-sdk.md)
 - [0006 — Notification channels and the alerts scheduler](adr/0006-notification-channels-and-scheduler.md)
 - [0007 — User profile contact routing](adr/0007-user-profile-alert-routing.md)
+- [0008 — Authenticated AI access and quotas](adr/0008-authenticated-ai-quotas.md)
+- [0009 — Explicit Compose environments](adr/0009-explicit-compose-environments.md)
