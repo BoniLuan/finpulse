@@ -36,10 +36,15 @@ final class AskQuestion
         $intent = $this->intentParser->parse($question);
 
         [$result, $sources] = match ($intent->type) {
+            Intent::INDICATOR_VALUE => $this->indicatorValue($intent, $question),
             Intent::INVESTMENT_RETURN => $this->investmentReturn($intent),
             Intent::INFLATION_CORRECTION => $this->inflationCorrection($intent),
-            default => $this->indicatorValue($intent),
+            default => $this->general($question),
         };
+
+        if (($result['type'] ?? null) === Intent::GENERAL && $intent->type !== Intent::GENERAL) {
+            $intent = new Intent(Intent::GENERAL, ['question' => $question]);
+        }
 
         $answer = $this->answerWriter->write($intent, $result);
         $id = $this->queryLog->log($question, $intent->type, $result, $answer, $sources, $userId);
@@ -48,14 +53,26 @@ final class AskQuestion
     }
 
     /** @return array{0: array<string,mixed>, 1: list<array<string,mixed>>} */
-    private function indicatorValue(Intent $intent): array
+    private function indicatorValue(Intent $intent, string $question): array
     {
-        $indicator = $this->resolveIndicator($intent->param('indicator', 'selic'));
+        $indicator = Indicator::fromName((string) $intent->param('indicator', ''));
+        if ($indicator === null) {
+            return $this->general($question);
+        }
         $value = $this->data->latest($indicator);
 
         return [
             ['type' => Intent::INDICATOR_VALUE, 'indicator' => $indicator->value, 'value' => $value],
             [$this->source($indicator)],
+        ];
+    }
+
+    /** @return array{0: array<string,mixed>, 1: list<array<string,mixed>>} */
+    private function general(string $question): array
+    {
+        return [
+            ['type' => Intent::GENERAL, 'question' => $question],
+            [],
         ];
     }
 
@@ -85,6 +102,7 @@ final class AskQuestion
                 $this->investment->annualToMonthlyPct($rate),
             ],
         };
+
 
         $data = [
             'type' => Intent::INVESTMENT_RETURN,

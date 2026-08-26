@@ -33,7 +33,7 @@ _PARAM_FIELDS = ("indicator", "principal", "months", "amount", "percent_of_cdi")
 def _to_intent(data: dict[str, Any]) -> dict[str, Any]:
     """Convert the flat schema dict into the {type, params} shape the API expects."""
     params = {field: data[field] for field in _PARAM_FIELDS if data.get(field) is not None}
-    return {"type": data.get("type") or "indicator_value", "params": params}
+    return {"type": data.get("type") or "general", "params": params}
 
 
 class GeminiProvider:
@@ -64,7 +64,10 @@ class GeminiProvider:
             )
             data = json.loads(response.text or "{}")
             if isinstance(data, dict) and data.get("type"):
-                return _to_intent(data)
+                intent = _to_intent(data)
+                if intent["type"] == "general":
+                    intent["params"]["question"] = question
+                return intent
         except Exception:  # noqa: BLE001 — degrade gracefully
             pass
         return self._fallback.parse_intent(question)

@@ -21,7 +21,7 @@ def test_to_intent_collects_only_present_params() -> None:
     }
 
 
-def test_to_intent_defaults_type_and_empty_params() -> None:
+def test_to_intent_defaults_to_general_and_empty_params() -> None:
     out = _to_intent({})
-    assert out["type"] == "indicator_value"
+    assert out["type"] == "general"
     assert out["params"] == {}

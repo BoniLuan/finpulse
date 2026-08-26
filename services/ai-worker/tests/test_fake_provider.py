@@ -32,6 +32,17 @@ def test_indicator_value_intent() -> None:
     assert intent["params"]["indicator"] == "cdi"
 
 
+def test_unrecognized_question_does_not_guess_an_indicator() -> None:
+    intent = FakeProvider().parse_intent("purple bicycles dance quietly")
+    assert intent["type"] == "general"
+    assert intent["params"]["question"] == "purple bicycles dance quietly"
+
+
+def test_general_explanation_suggests_supported_topics() -> None:
+    answer = FakeProvider().explain({"type": "general"}, {"type": "general"})
+    assert "Selic" in answer
+
+
 def test_explain_investment() -> None:
     answer = FakeProvider().explain(
         {"type": "investment_return"},

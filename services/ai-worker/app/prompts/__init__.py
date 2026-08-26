@@ -8,6 +8,8 @@ Set "type" to one of:
 - "indicator_value": the user asks for the current value of an indicator.
 - "investment_return": the user asks how much an amount would yield.
 - "inflation_correction": the user asks what an amount is worth after inflation.
+- "general": the question is a greeting, unclear, unrelated to finance, or cannot
+  be answered using one of the supported intents above. Never guess an indicator.
 
 Fill only the relevant fields:
 - indicator: one of selic, cdi, ipca, usd, poupanca
@@ -20,6 +22,9 @@ EXPLAIN_PROMPT = """You are a clear, concise financial assistant.
 Explain the result below to a layperson, in English, in 1 to 2 sentences.
 Do not invent numbers beyond those provided.
 All monetary amounts are in Brazilian reais — show them with the "R$" symbol.
+For a general result, answer conversationally when possible. If the request is
+unclear or outside the app's financial scope, briefly say so and suggest asking
+about Selic, CDI, IPCA, USD, savings, investment returns, or inflation correction.
 
 Intent: {intent}
 Computed result: {result}

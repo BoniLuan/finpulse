@@ -85,10 +85,11 @@ class FakeProvider:
                 "params": {"amount": _extract_amount(text), "months": _extract_months(text)},
             }
 
-        return {
-            "type": "indicator_value",
-            "params": {"indicator": _normalize_indicator(text) or "selic"},
-        }
+        indicator = _normalize_indicator(text)
+        if indicator is not None:
+            return {"type": "indicator_value", "params": {"indicator": indicator}}
+
+        return {"type": "general", "params": {"question": question}}
 
     def explain(self, intent: dict[str, Any], result: dict[str, Any]) -> str:
         kind = result.get("type", intent.get("type"))
@@ -104,6 +105,12 @@ class FakeProvider:
             return (
                 f"R$ {result['amount']:.2f} adjusted for accumulated inflation "
                 f"({result['accumulated_pct']:.2f}%) is worth R$ {result['corrected']:.2f}."
+            )
+        if kind == "general":
+            return (
+                "I can help with Brazilian financial indicators and calculations. "
+                "Try asking about Selic, CDI, IPCA, the US dollar, savings returns, "
+                "investment growth, or inflation correction."
             )
         return (
             f"The latest value of {result.get('indicator', 'the indicator')} "

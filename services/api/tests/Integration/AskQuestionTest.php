@@ -47,6 +47,47 @@ final class AskQuestionTest extends TestCase
         self::assertStringContainsString('answer', $result->answer);
         self::assertSame('BACEN SGS', $result->sources[0]['name']);
     }
+
+    public function testGeneralQuestionDoesNotFetchAnIndicator(): void
+    {
+        $data = new FakeDataProvider([]);
+        $askQuestion = new AskQuestion(
+            new FakeIntentParser(new Intent(Intent::GENERAL)),
+            $data,
+            new FakeAnswerWriter(),
+            new FakeQueryLog(),
+            new InvestmentCalculator(),
+            new InflationCorrector(),
+        );
+
+        $result = $askQuestion->handle('purple bicycles dance quietly');
+
+        self::assertSame(Intent::GENERAL, $result->data['type']);
+        self::assertSame('purple bicycles dance quietly', $result->data['question']);
+
+        self::assertSame([], $result->sources);
+        self::assertSame(0, $data->latestCalls);
+    }
+
+    public function testInvalidIndicatorIsLoggedAsGeneral(): void
+    {
+        $data = new FakeDataProvider([]);
+        $log = new FakeQueryLog();
+        $askQuestion = new AskQuestion(
+            new FakeIntentParser(new Intent(Intent::INDICATOR_VALUE, ['indicator' => 'unknown'])),
+            $data,
+            new FakeAnswerWriter(),
+            $log,
+            new InvestmentCalculator(),
+            new InflationCorrector(),
+        );
+
+        $result = $askQuestion->handle('tell me something');
+
+        self::assertSame(Intent::GENERAL, $result->data['type']);
+        self::assertSame(Intent::GENERAL, $log->lastIntentType);
+        self::assertSame(0, $data->latestCalls);
+    }
 }
 
 final class FakeIntentParser implements IntentParser
@@ -63,6 +104,8 @@ final class FakeIntentParser implements IntentParser
 
 final class FakeDataProvider implements IndicatorDataProvider
 {
+    public int $latestCalls = 0;
+
     /** @param array<string, float> $latest */
     public function __construct(private readonly array $latest)
     {
@@ -70,6 +113,7 @@ final class FakeDataProvider implements IndicatorDataProvider
 
     public function latest(Indicator $indicator): float
     {
+        ++$this->latestCalls;
         return $this->latest[$indicator->value] ?? 0.0;
     }
 
@@ -90,6 +134,8 @@ final class FakeAnswerWriter implements AnswerWriter
 
 final class FakeQueryLog implements QueryLogRepository
 {
+    public ?string $lastIntentType = null;
+
     public function log(
         string $question,
         string $intentType,
@@ -98,6 +144,7 @@ final class FakeQueryLog implements QueryLogRepository
         array $sources,
         ?string $userId,
     ): string {
+        $this->lastIntentType = $intentType;
         return 'query-1';
     }
 

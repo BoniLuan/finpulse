@@ -2,8 +2,9 @@
 COMPOSE = docker compose -f docker-compose.yml
 DEV_COMPOSE = $(COMPOSE) -f compose.dev.yml
 POWERSHELL ?= powershell
+BASE_REF ?= HEAD
 
-.PHONY: help up down build dev-up dev-down dev-build verify rebuild-affected logs ps migrate seed test lint api-shell ai-shell
+.PHONY: help up down build dev-up dev-down dev-build verify verify-ps rebuild-affected deploy-fast ship rollback hooks-install hooks-disable logs ps migrate seed test lint api-shell ai-shell
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -27,11 +28,30 @@ dev-down: ## Stop the development stack
 dev-build: ## Build development images
 	$(DEV_COMPOSE) build
 
-verify: ## Test services affected by uncommitted changes (PowerShell)
+verify: ## Test and lint services affected by uncommitted changes
+	bash scripts/verify.sh $(BASE_REF)
+
+verify-ps: ## Run legacy affected-service verification (PowerShell)
 	$(POWERSHELL) -NoProfile -File scripts/verify-changes.ps1
 
 rebuild-affected: ## Verify and rebuild only affected images (PowerShell)
 	$(POWERSHELL) -NoProfile -File scripts/verify-changes.ps1 -BuildAffected
+
+deploy-fast: ## Verify, rebuild affected production services, migrate, and health-check
+	bash scripts/deploy.sh
+
+ship: deploy-fast ## Deploy the current commit, then push it to origin
+	git push
+
+rollback: ## Restore service images captured before the last deployment
+	bash scripts/rollback.sh
+
+hooks-install: ## Enable automatic deployment after each local commit
+	bash scripts/install-hooks.sh
+
+hooks-disable: ## Disable repository-managed Git hooks for this checkout
+	git config --unset core.hooksPath || true
+	@echo "FinPulse Git hooks disabled."
 
 logs: ## Tail all logs
 	$(COMPOSE) logs -f

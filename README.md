@@ -77,7 +77,15 @@ credentials**.
 | `make lint` | run all linters |
 | `make verify` | test services affected by current changes |
 | `make rebuild-affected` | verify and rebuild only affected images |
+| `make deploy-fast` | test and deploy affected production services |
+| `make ship` | deploy the current commit and then push it |
+| `make rollback` | restore images from the previous deployment |
+| `make hooks-install` | auto-deploy after each local commit |
 | `make logs` | tail all service logs |
+
+The live server currently operates as a public staging environment for rapid
+iteration. See [`docs/WORKFLOW.md`](docs/WORKFLOW.md#public-staging-deployment)
+for automatic post-commit deployment, health checks, and rollback behavior.
 
 Production uses only `docker-compose.yml`, publishes no FinPulse host ports, and
 expects the external `web-proxy` network used by the public reverse proxy. Create

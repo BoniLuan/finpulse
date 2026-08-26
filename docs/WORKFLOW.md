@@ -32,7 +32,7 @@ Every change — feature, fix, or refactor — follows the same five steps:
    (`Http → Application → Domain ← Infrastructure`; Domain stays pure). Add a
    new provider/channel by implementing its interface — never branch on a type.
 4. **Test.** Business rules (Domain) get unit tests; every new/changed endpoint
-   gets a test. During development, run `make verify` to test only affected
+   gets a test. During development, run `make verify` to test and lint only affected
    services, or `make test` and `make lint` for the complete suite.
 5. **Hand off for review after build and tests.** Never commit until the user
    explicitly asks. When requested, use a Conventional Commit and include both
@@ -89,6 +89,43 @@ Check items off as they land. Add new items here before starting them.
       artwork, and a rotating question-suggestion carousel.
 - [x] Browser-native voice dictation for the question field, with graceful
       fallback when speech recognition is unavailable.
+
+## Public-staging deployment
+
+Until FinPulse has external users, the server intentionally operates as a
+public staging environment: commits can be tested and deployed rapidly, and no
+uptime commitment is implied. A commit remains the deployment boundary; saving
+a source file never triggers deployment.
+
+Run `make hooks-install` once to enable the tracked `post-commit` hook and mark
+the current commit as the initial deployed state. Each subsequent local commit
+runs `make deploy-fast` synchronously. The deployment:
+
+1. refuses a dirty working tree and locks against overlapping deployments;
+2. detects runtime services changed since the last successful deployment;
+3. runs affected tests, lint, and static analysis in isolated test images;
+4. snapshots running image IDs, builds production images, applies idempotent
+   migrations when needed, and recreates only affected services;
+5. checks the public site and `/api/v1/health`, automatically restoring the
+   previous service images if either check fails.
+
+Useful commands:
+
+```sh
+make verify         # affected checks for uncommitted work
+make deploy-fast    # deploy the current committed version
+make ship           # deploy successfully, then git push
+make rollback       # restore images from the previous deployment
+make hooks-disable  # stop automatic post-commit deployment
+```
+
+Set `FINPULSE_AUTO_DEPLOY=0` for a single commit that must not auto-deploy.
+Deployment state, locks, and rollback image IDs live under `.git/`. Rollback
+does not undo database migrations, so migrations must remain backward compatible.
+
+GitHub Actions remains an independent CI check, but public-staging deployment
+does not wait for its queue. Once real users arrive, deployment should move
+behind CI and use published, commit-tagged images.
 
 ## Conventions quick-reference
 
