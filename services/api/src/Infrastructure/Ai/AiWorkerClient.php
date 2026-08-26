@@ -37,7 +37,7 @@ final class AiWorkerClient implements IntentParser, AnswerWriter
     public function write(Intent $intent, array $result): string
     {
         $body = $this->post('/infer/explain', [
-            'intent' => ['type' => $intent->type, 'params' => $intent->params],
+            'intent' => ['type' => $intent->type, 'params' => (object) $intent->params],
             'result' => $result,
         ]);
 

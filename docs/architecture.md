@@ -67,6 +67,8 @@ interfaces declared by `Domain`/`Application`; the DI container wires them in
 5. A `Domain` service computes the result
    (`InvestmentCalculator` / `InflationCorrector`).
 6. Use case calls `ai-worker` `POST /infer/explain` → plain-language answer.
+   The API always serializes intent parameters as a JSON object, including when
+   no supported tool or indicator was extracted and the parameter map is empty.
 7. A `query_logs` row is persisted for the authenticated user. The API returns `{ id, answer, data, sources }`.
 
 Conversation history is read and deleted through authenticated, user-scoped API

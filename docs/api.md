@@ -65,7 +65,9 @@ The `question` field must contain between 1 and 1,000 bytes.
 
 Supported intents: `indicator_value`, `investment_return` (savings, Tesouro
 Selic, or CDB — pass `indicator: cdi` with `percent_of_cdi` for "% of CDI"),
-and `inflation_correction`.
+and `inflation_correction`. If no supported tool or indicator can be extracted,
+the request still completes through the default indicator response instead of
+exposing an internal AI-worker validation error.
 
 All API traffic is limited per client IP by `RATE_LIMIT_*` (60 requests per 60
 seconds by default). In addition, this endpoint is limited per authenticated user
