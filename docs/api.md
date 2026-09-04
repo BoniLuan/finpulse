@@ -122,3 +122,40 @@ DELETE /api/v1/history/{id}  → 204 on success, 404 if not found / not owned
 ```
 
 The web client exposes question history only to authenticated users.
+
+## Historical indicator observations
+
+```text
+GET /api/v1/indicators/{key}/observations?months=24
+```
+
+Returns normalized observations persisted by the scheduled collector rather than
+performing an upstream request in the HTTP path. `key` currently accepts `selic`
+or `ipca`; `months` defaults to `24` and must be between `1` and `120`.
+
+```json
+{
+  "indicator": { "key": "selic", "label": "Selic target rate (annual)", "series": 432 },
+  "period": { "from": "2024-09-04", "to": "2026-09-04" },
+  "observations": [
+    { "date": "2026-08-01", "value": 15.0 }
+  ]
+}
+```
+
+An empty `observations` list is valid while the first background collection is
+pending. Collection uses an overlapping incremental window and is idempotent by indicator and observation
+date.
+
+## Selic × IPCA comparison
+
+```text
+GET /api/v1/comparisons/selic-ipca?months=24
+```
+
+Reads the normalized PostgreSQL history and returns both series plus deterministic
+analytics: Selic start/latest/change in percentage points, compounded IPCA for
+the selected period and trailing 12 months, estimated latest real annual rate,
+and Pearson correlation between monthly Selic averages and monthly IPCA. Metrics
+are `null` when the stored data is insufficient. `months` accepts `1` through
+`120`.

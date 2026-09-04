@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use FinPulse\Application\Alert\CheckAlerts;
+use FinPulse\Application\Indicator\CollectIndicatorHistory;
 use FinPulse\Application\Auth\RegisterUser;
 use FinPulse\Application\Alert\CreateAlert;
 
@@ -35,12 +36,17 @@ switch ($command) {
         }
         break;
 
+    case 'indicators:collect':
+        $written = $container->get(CollectIndicatorHistory::class)->handle();
+        fwrite(STDOUT, "indicator history collected: " . json_encode($written, JSON_THROW_ON_ERROR) . "\n");
+        break;
+
     case 'alerts:check':
         $triggered = $container->get(CheckAlerts::class)->handle();
         fwrite(STDOUT, "alerts checked; {$triggered} triggered\n");
         break;
 
     default:
-        fwrite(STDOUT, "FinPulse console. Commands: migrate | seed | alerts:check\n");
+        fwrite(STDOUT, "FinPulse console. Commands: migrate | seed | indicators:collect | alerts:check\n");
         break;
 }

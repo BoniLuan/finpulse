@@ -21,6 +21,7 @@ x-api-env: &api-env
   COINBASE_BASE_URL: ${COINBASE_BASE_URL:-https://api.coinbase.com}
   CRYPTO_CACHE_TTL: ${CRYPTO_CACHE_TTL:-60}
   ALERTS_INTERVAL: ${ALERTS_INTERVAL:-300}
+  COLLECTOR_INTERVAL: ${COLLECTOR_INTERVAL:-21600}
   ALERTS_COOLDOWN: ${ALERTS_COOLDOWN:-3600}
   MAIL_HOST: ${MAIL_HOST:-mailpit}
   MAIL_PORT: ${MAIL_PORT:-1025}
@@ -54,6 +55,18 @@ services:
       redis:
         condition: service_started
       ai-worker:
+        condition: service_started
+    restart: unless-stopped
+
+  # Collects normalized economic history independently from HTTP requests.
+  collector:
+    build: ./services/api
+    command: sh -c 'while true; do php bin/console indicators:collect; sleep "$${COLLECTOR_INTERVAL:-21600}"; done'
+    environment: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
         condition: service_started
     restart: unless-stopped
 

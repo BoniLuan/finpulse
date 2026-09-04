@@ -65,6 +65,11 @@ Check items off as they land. Add new items here before starting them.
       delete) via `GET/POST/DELETE /alerts` and `GET /auth/me`.
 
 ### ▶ Next (suggested order)
+- [x] Historical data foundation: scheduled, idempotent Selic/IPCA
+      collection, normalized PostgreSQL observations, public history API, and
+      dashboard comparison chart.
+- [x] Deterministic Selic × IPCA analytics: compounded inflation, real-rate
+      estimate, monthly correlation, comparison API, and dashboard insights.
 - [x] `GET /indicators` endpoint so the web widget stops abusing `/ask`.
 - [x] More calculators (Tesouro Selic, CDB %CDI) + their unit tests.
 - [x] Notification channels: `email` (SMTP/Mailpit) + `whatsapp` (Meta Cloud API) (ADR 0006).

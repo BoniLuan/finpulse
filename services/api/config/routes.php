@@ -7,12 +7,14 @@ use FinPulse\Http\Action\CreateAlertAction;
 use FinPulse\Http\Action\DeleteAlertAction;
 use FinPulse\Http\Action\DeleteHistoryAction;
 use FinPulse\Http\Action\HealthAction;
+use FinPulse\Http\Action\IndicatorHistoryAction;
 use FinPulse\Http\Action\IndicatorsAction;
 use FinPulse\Http\Action\ListAlertsAction;
 use FinPulse\Http\Action\ListHistoryAction;
 use FinPulse\Http\Action\LoginAction;
 use FinPulse\Http\Action\MeAction;
 use FinPulse\Http\Action\RegisterAction;
+use FinPulse\Http\Action\SelicIpcaComparisonAction;
 use FinPulse\Http\Action\UpdateMeAction;
 use FinPulse\Http\Middleware\AiRateLimitMiddleware;
 use FinPulse\Http\Middleware\JwtAuthMiddleware;
@@ -23,6 +25,8 @@ return static function (App $app): void {
     $app->group('/api/v1', function (RouteCollectorProxy $group): void {
         $group->get('/health', HealthAction::class);
         $group->get('/indicators', IndicatorsAction::class);
+        $group->get('/indicators/{key}/observations', IndicatorHistoryAction::class);
+        $group->get('/comparisons/selic-ipca', SelicIpcaComparisonAction::class);
         // Last-added middleware runs first: authenticate, then apply per-user AI quotas.
         $group->post('/ask', AskAction::class)
             ->add(AiRateLimitMiddleware::class)

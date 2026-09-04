@@ -11,17 +11,23 @@ use FinPulse\Application\Auth\RegisterUser;
 use FinPulse\Application\Auth\UpdateProfile;
 use FinPulse\Application\History\DeleteHistory;
 use FinPulse\Application\History\ListHistory;
+use FinPulse\Application\Indicator\CollectIndicatorHistory;
+use FinPulse\Application\Indicator\CompareSelicIpca;
+use FinPulse\Application\Indicator\ListIndicatorHistory;
 use FinPulse\Application\Indicator\ListIndicators;
 use FinPulse\Application\Port\AlertThrottle;
 use FinPulse\Application\Port\AnswerWriter;
 use FinPulse\Application\Port\CryptoPriceProvider;
+use FinPulse\Application\Port\HistoricalIndicatorDataProvider;
 use FinPulse\Application\Port\IndicatorDataProvider;
+use FinPulse\Application\Port\IndicatorHistoryRepository;
 use FinPulse\Application\Port\IntentParser;
 use FinPulse\Application\Port\NotificationChannel;
 use FinPulse\Application\Port\QueryLogRepository;
 use FinPulse\Application\Port\RateLimitCounter;
 use FinPulse\Application\Port\TokenIssuer;
 use FinPulse\Domain\Alert\AlertRepository;
+use FinPulse\Domain\Finance\MacroComparisonCalculator;
 use FinPulse\Domain\User\UserRepository;
 use FinPulse\Http\Middleware\AiRateLimitMiddleware;
 use FinPulse\Infrastructure\Ai\AiWorkerClient;
@@ -34,6 +40,7 @@ use FinPulse\Infrastructure\Channel\WhatsAppChannel;
 use FinPulse\Infrastructure\Market\CoinbasePriceClient;
 use FinPulse\Infrastructure\Notification\RedisAlertThrottle;
 use FinPulse\Infrastructure\Persistence\PdoAlertRepository;
+use FinPulse\Infrastructure\Persistence\PdoIndicatorHistoryRepository;
 use FinPulse\Infrastructure\Persistence\PdoQueryLogRepository;
 use FinPulse\Infrastructure\Persistence\PdoUserRepository;
 use GuzzleHttp\Client as GuzzleClient;
@@ -93,6 +100,8 @@ return static function (ContainerBuilder $builder): void {
             => new PdoAlertRepository($c->get(PDO::class)),
         QueryLogRepository::class => static fn (ContainerInterface $c)
             => new PdoQueryLogRepository($c->get(PDO::class)),
+        IndicatorHistoryRepository::class => static fn (ContainerInterface $c)
+            => new PdoIndicatorHistoryRepository($c->get(PDO::class)),
 
         TokenIssuer::class => static fn (): TokenIssuer
             => new JwtService($settings['jwt']['secret'], $settings['jwt']['ttl']),
@@ -103,6 +112,8 @@ return static function (ContainerBuilder $builder): void {
             $settings['bacen']['base_url'],
             $settings['bacen']['cache_ttl'],
         ),
+        HistoricalIndicatorDataProvider::class => static fn (ContainerInterface $c)
+            => $c->get(IndicatorDataProvider::class),
         CryptoPriceProvider::class => static fn (ContainerInterface $c) => new CoinbasePriceClient(
             $c->get(ClientInterface::class),
             $c->get(RedisCache::class),
@@ -176,6 +187,12 @@ return static function (ContainerBuilder $builder): void {
             => new DeleteHistory($c->get(QueryLogRepository::class)),
         ListIndicators::class => static fn (ContainerInterface $c)
             => new ListIndicators($c->get(IndicatorDataProvider::class), $c->get(CryptoPriceProvider::class)),
+        CollectIndicatorHistory::class => static fn (ContainerInterface $c)
+            => new CollectIndicatorHistory($c->get(HistoricalIndicatorDataProvider::class), $c->get(IndicatorHistoryRepository::class)),
+        CompareSelicIpca::class => static fn (ContainerInterface $c)
+            => new CompareSelicIpca($c->get(IndicatorHistoryRepository::class), new MacroComparisonCalculator()),
+        ListIndicatorHistory::class => static fn (ContainerInterface $c)
+            => new ListIndicatorHistory($c->get(IndicatorHistoryRepository::class)),
         CreateAlert::class => static fn (ContainerInterface $c)
             => new CreateAlert($c->get(AlertRepository::class)),
         CheckAlerts::class => static fn (ContainerInterface $c) => new CheckAlerts(

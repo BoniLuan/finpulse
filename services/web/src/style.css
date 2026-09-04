@@ -539,3 +539,36 @@ main.dashboard {
   .cards { gap: 1.1rem; }
   .card { padding: 1.25rem 1.35rem; }
 }
+
+/* ── Historical macro comparison ─────────────────────────────────────── */
+.macro-history { grid-column: 1 / -1; }
+.period-control { display: flex; align-items: center; gap: 0.55rem; color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+.period-control select { padding: 0.45rem 0.65rem; border: 1px solid var(--line); border-radius: 9px; background: var(--card); color: var(--text); }
+.history-chart-panel { padding: 1rem 1.15rem 0.8rem; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 1rem; color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+.chart-legend span::before { content: ""; display: inline-block; width: 0.65rem; height: 0.65rem; margin-right: 0.38rem; border-radius: 50%; }
+.selic-dot::before { background: var(--brand); }
+.ipca-dot::before { background: #f59e0b; }
+.macro-chart { min-height: 18rem; display: grid; place-items: center; margin-top: 0.45rem; overflow: hidden; }
+.macro-chart svg { display: block; width: 100%; height: auto; max-height: 21rem; overflow: visible; }
+.chart-grid line { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart-grid text { fill: var(--muted); font-size: 18px; }
+.chart-line { fill: none; stroke-width: 3; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+.chart-line.selic { stroke: var(--brand); }
+.chart-line.ipca { stroke: #f59e0b; }
+.chart-skeleton { width: 100%; height: 14rem; }
+.chart-empty { color: var(--muted); text-align: center; }
+.chart-status { margin: 0.1rem 0 0; color: var(--muted); font-size: 0.72rem; }
+@media (max-width: 560px) {
+  .macro-history { margin-top: 1.3rem; }
+  .macro-history .section-heading { align-items: center; }
+  .period-control { font-size: 0; }
+  .period-control select { font-size: 0.78rem; }
+  .history-chart-panel { padding-inline: 0.75rem; }
+  .macro-chart { min-height: 12rem; }
+}
+.macro-insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; margin-bottom: 1rem; }
+.macro-insights article { padding: 0.75rem 0.85rem; border: 1px solid var(--line); border-radius: 11px; background: var(--bg-soft); }
+.macro-insights span { display: block; color: var(--muted); font-size: 0.68rem; font-weight: 700; }
+.macro-insights strong { display: block; margin-top: 0.18rem; font-size: 1.05rem; }
+@media (max-width: 700px) { .macro-insights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

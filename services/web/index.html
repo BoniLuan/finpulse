@@ -42,6 +42,25 @@
         <div id="indicators" class="cards"></div>
       </section>
 
+      <section class="macro-history">
+        <div class="section-heading">
+          <div><span class="eyebrow">Historical data</span><h2>Selic vs. IPCA</h2></div>
+          <label class="period-control">Period
+            <select id="history-period" aria-label="Historical comparison period">
+              <option value="12">12 months</option>
+              <option value="24" selected>24 months</option>
+              <option value="60">5 years</option>
+            </select>
+          </label>
+        </div>
+        <div class="panel history-chart-panel">
+          <div id="macro-insights" class="macro-insights" aria-live="polite"></div>
+          <div class="chart-legend"><span class="selic-dot">Selic · % per year</span><span class="ipca-dot">IPCA · % per month</span></div>
+          <div id="macro-chart" class="macro-chart" aria-live="polite"><span class="skeleton chart-skeleton"></span></div>
+          <p id="macro-chart-status" class="chart-status">Independent visual scales · normalized observations collected from BACEN SGS.</p>
+        </div>
+      </section>
+
       <section class="chat">
         <div class="section-heading"><div><span class="eyebrow">Assistant</span><h2>Ask something</h2></div></div>
         <div class="panel">

@@ -44,6 +44,10 @@ async function request(path, { method = "GET", body, auth = false } = {}) {
 }
 
 export const getIndicators = () => request("/indicators");
+export const getIndicatorObservations = (key, months = 24) =>
+export const getSelicIpcaComparison = (months = 24) =>
+  request(`/comparisons/selic-ipca?months=${months}`);
+  request(`/indicators/${encodeURIComponent(key)}/observations?months=${months}`);
 export const ask = (question) => request("/ask", { method: "POST", body: { question }, auth: true });
 
 export const register = (email, password, displayName, phone) =>

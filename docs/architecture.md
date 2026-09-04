@@ -33,8 +33,9 @@ orchestration; Python owns AI; the frontend is thin.**
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
 | `web` | static HTML/CSS/JS (ES modules, no build) | Responsive dashboard, live indicator carousel, chat, contextual history/alerts, and a theme-aware market background. |
 | `db` | PostgreSQL 16 | User profiles/contact destinations, alerts, and authenticated conversation history/query logs. |
-| `redis` | Redis 7 | BACEN/market cache, alert cooldowns, and rate-limit counters. |
+| `redis` | Redis 7 | BACEN/market cache, collector fetch cache, alert cooldowns, and rate-limit counters. |
 | `scheduler` | PHP 8.3 CLI | Evaluates stored alerts on a configured interval. |
+| `collector` | PHP 8.3 CLI | Periodically fetches, normalizes, and upserts BACEN historical observations. |
 | `mailpit` | Mailpit | Internal SMTP sink used until a real SMTP service is configured; UI is exposed only in development. |
 
 The gateway resolves `api` and `web` through Docker's embedded DNS with a short
@@ -103,3 +104,24 @@ See the ADRs:
 - [0007 — User profile contact routing](adr/0007-user-profile-alert-routing.md)
 - [0008 — Authenticated AI access and quotas](adr/0008-authenticated-ai-quotas.md)
 - [0009 — Explicit Compose environments](adr/0009-explicit-compose-environments.md)
+
+## Historical data flow
+
+The `collector` service periodically runs `indicators:collect`. It fetches cached
+BACEN SGS series through the existing provider, normalizes source dates and
+numeric values, and upserts them into `indicator_observations`. The composite
+primary key `(indicator_key, observed_on)` makes retries and restarts idempotent.
+HTTP history requests read PostgreSQL only, keeping upstream latency and failures
+out of the user request path. Redis continues to protect BACEN from redundant
+fetches. The first persisted catalog covers daily Selic and monthly IPCA data;
+the generic schema can accept additional economic series without a new table.
+
+## Deterministic macro analytics
+
+`CompareSelicIpca` reads both persisted series for one period and delegates all
+math to the pure `MacroComparisonCalculator` domain service. Daily Selic points
+are averaged by calendar month before correlation with monthly IPCA. Inflation
+is compounded rather than summed, and the estimated real rate uses the Fisher
+relationship between latest annual Selic and trailing 12-month IPCA. The same
+structured result feeds the REST endpoint and dashboard; a later AI intent will
+explain these computed values instead of asking an LLM to perform arithmetic.

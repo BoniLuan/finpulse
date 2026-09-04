@@ -1,6 +1,7 @@
 import {
   ask,
   getIndicators,
+  getSelicIpcaComparison,
   token,
   register,
   login,
@@ -201,6 +202,84 @@ function wireVoiceInput(input) {
   });
 
   status.textContent = "Voice is transcribed by your browser and remains editable.";
+}
+
+function renderMacroInsights(summary) {
+  const insights = $("macro-insights");
+  const metrics = [
+    ["Selic change", summary.selic_change_pp, " pp"],
+    ["Accumulated IPCA", summary.ipca_accumulated_pct, "%"],
+    ["Estimated real rate", summary.real_rate_latest_pct, "% p.a."],
+    ["Monthly correlation", summary.monthly_correlation, ""],
+  ];
+  insights.innerHTML = metrics.map(([label, value, suffix]) =>
+    `<article><span>${label}</span><strong>${value == null ? "—" : `${Number(value).toFixed(2)}${suffix}`}</strong></article>`,
+  ).join("");
+}
+
+function renderMacroChart(series) {
+  const chart = $("macro-chart");
+  const populated = series.filter((item) => item.observations.length);
+  const points = populated.flatMap((item) => item.observations);
+  if (!points.length) {
+    chart.innerHTML = `<p class="chart-empty">Historical data is being collected. Check back shortly.</p>`;
+    return;
+  }
+
+  const width = 1000;
+  const height = 300;
+  const padding = 48;
+  const timestamps = points.map((point) => Date.parse(point.date));
+  const minDate = Math.min(...timestamps);
+  const maxDate = Math.max(...timestamps);
+  const x = (date) => padding + ((Date.parse(date) - minDate) / Math.max(1, maxDate - minDate)) * (width - padding * 2);
+  const scaleFor = (observations) => {
+    const values = observations.map((point) => point.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const margin = Math.max((max - min) * 0.12, 0.1);
+    const low = min - margin;
+    const high = max + margin;
+    return {
+      low,
+      high,
+      y: (value) => height - padding - ((value - low) / Math.max(0.01, high - low)) * (height - padding * 2),
+    };
+  };
+  const scaled = populated.map((item) => ({ ...item, scale: scaleFor(item.observations) }));
+  const path = (item) => item.observations
+    .map((point, index) => `${index ? "L" : "M"}${x(point.date).toFixed(1)},${item.scale.y(point.value).toFixed(1)}`)
+    .join(" ");
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+    const gridY = padding + ratio * (height - padding * 2);
+    return `<line x1="${padding}" y1="${gridY}" x2="${width - padding}" y2="${gridY}"/>`;
+  }).join("");
+  chart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Historical Selic and IPCA trend comparison with independent scales">` +
+    `<g class="chart-grid">${grid}</g>` +
+    scaled.map((item) => `<path class="chart-line ${item.indicator.key}" d="${path(item)}"/>`).join("") +
+    `</svg>`;
+}
+async function loadMacroHistory() {
+  const chart = $("macro-chart");
+  const months = Number($("history-period").value);
+  chart.innerHTML = `<span class="skeleton chart-skeleton"></span>`;
+  $("macro-insights").innerHTML = "";
+  try {
+    const comparison = await getSelicIpcaComparison(months);
+    const series = comparison.series;
+    renderMacroInsights(comparison.summary);
+    renderMacroChart(series);
+    const total = series.reduce((sum, item) => sum + item.observations.length, 0);
+    $("macro-chart-status").textContent = `${total} normalized observations · independent visual scales · persisted in PostgreSQL`;
+  } catch (error) {
+    chart.innerHTML = `<p class="chart-empty">Historical series are temporarily unavailable.</p>`;
+    $("macro-chart-status").textContent = error.message;
+  }
+}
+
+function wireMacroHistory() {
+  $("history-period").addEventListener("change", loadMacroHistory);
+  loadMacroHistory();
 }
 
 function wireChat() {
@@ -649,6 +728,7 @@ async function refreshAuthUI() {
 }
 
 loadIndicators();
+wireMacroHistory();
 wireChat();
 wireTheme();
 refreshAuthUI();

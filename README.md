@@ -1,9 +1,10 @@
 # FinPulse
 
-> Your AI finance assistant on chat — answers financial questions and fires
-> alerts using **real, free Brazilian Central Bank (BACEN) data** + an AI layer.
+> Brazilian economic data and AI insights platform — explore historical indicators,
+> ask financial questions, and create alerts using **real, free BACEN data**.
 
-FinPulse is a small but production-shaped platform: ask things like *"how much
+FinPulse is a production-shaped economic data platform. Compare historical Selic
+and IPCA observations, ask things like *"how much
 does 10 thousand in savings yield in 1 year?"* or *"what is the current dollar
 rate?"* and get a clear, AI-explained answer backed by live SELIC / CDI / IPCA /
 USD data. You can also register alerts (e.g. *notify me when the dollar passes
@@ -24,7 +25,7 @@ Nginx gateway.
    Browser / WhatsApp ──▶ gateway (nginx) ──▶ api (PHP 8.3 + Slim 4)
                                                 │     │
                                   HTTP ─────────┘     ├──▶ PostgreSQL 16
-                                  ▼                   └──▶ Redis 7 (cache/queue/ratelimit)
+                                  ▼                   └──▶ Redis 7 (cache/ratelimit)
                        ai-worker (Python 3.12 + FastAPI)
                        LLM provider selected by env (fake or Gemini)
 ```
@@ -37,9 +38,9 @@ Nginx gateway.
   `LLMProvider` (`fake` by default; Gemini available via env).
 - **`services/web`** — static HTML/CSS/JS (ES modules, no build step), served by
   Nginx. Intentionally thin UI: landing page, live indicators widget, and a chat
-  box. The backend is the star.
+  box and a persisted Selic/IPCA historical comparison. The backend is the star.
 - **`infra/gateway`** — Nginx reverse proxy, the single public entry point.
-- **PostgreSQL** for data, **Redis** for cache + a simple queue + rate limiting.
+- **PostgreSQL** for data, **Redis** for cache + rate limiting.
 
 See [`docs/architecture.md`](docs/architecture.md) and the
 [ADRs](docs/adr/) for the reasoning behind these choices.
@@ -102,6 +103,8 @@ the application log, SMTP email (Mailpit by default), or the Meta WhatsApp Cloud
 API. The dashboard also includes cached BTC/BRL and ETH/BRL spot prices from
 Coinbase's public Data API. Planned next:
 
+- Natural-language queries over historical comparisons
+- Redis-backed collection queue and anomaly detection
 - Prometheus + Grafana observability (`--profile observability`)
 - OpenAPI spec + Swagger UI
 - End-to-end stack test
