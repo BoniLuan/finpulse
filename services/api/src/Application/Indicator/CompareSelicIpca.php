@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace FinPulse\Application\Indicator;
 
 use FinPulse\Application\Port\IndicatorHistoryRepository;
+use FinPulse\Application\Port\MacroComparisonProvider;
 use FinPulse\Domain\Finance\Indicator;
 use FinPulse\Domain\Finance\MacroComparisonCalculator;
 
-final class CompareSelicIpca
+final class CompareSelicIpca implements MacroComparisonProvider
 {
     public function __construct(
         private readonly IndicatorHistoryRepository $history,
@@ -17,7 +18,7 @@ final class CompareSelicIpca
     }
 
     /** @return array<string, mixed> */
-    public function handle(int $months = 24): array
+    public function compare(int $months = 24): array
     {
         if ($months < 1 || $months > 120) {
             throw new \InvalidArgumentException('months must be between 1 and 120.');

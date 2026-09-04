@@ -103,7 +103,6 @@ the application log, SMTP email (Mailpit by default), or the Meta WhatsApp Cloud
 API. The dashboard also includes cached BTC/BRL and ETH/BRL spot prices from
 Coinbase's public Data API. Planned next:
 
-- Natural-language queries over historical comparisons
 - Redis-backed collection queue and anomaly detection
 - Prometheus + Grafana observability (`--profile observability`)
 - OpenAPI spec + Swagger UI

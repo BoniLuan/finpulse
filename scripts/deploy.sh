@@ -52,8 +52,8 @@ declare -A selected=()
 for file in "${changed[@]}"; do
     case "$file" in
         docker-compose.yml)
-            for service in gateway api scheduler ai-worker web; do selected[$service]=1; done ;;
-        services/api/*) selected[api]=1; selected[scheduler]=1 ;;
+            for service in gateway api collector scheduler ai-worker web; do selected[$service]=1; done ;;
+        services/api/*) selected[api]=1; selected[collector]=1; selected[scheduler]=1 ;;
         services/ai-worker/*) selected[ai-worker]=1 ;;
         services/web/*) selected[web]=1 ;;
         infra/gateway/*) selected[gateway]=1 ;;
@@ -79,7 +79,7 @@ for service in "${services[@]}"; do
 done
 
 docker compose -f docker-compose.yml build "${services[@]}"
-if [[ -n "${selected[api]:-}" || -n "${selected[scheduler]:-}" ]]; then
+if [[ -n "${selected[api]:-}" || -n "${selected[collector]:-}" || -n "${selected[scheduler]:-}" ]]; then
     docker compose -f docker-compose.yml run --rm --no-deps api php bin/console migrate
 fi
 rollback_needed=1

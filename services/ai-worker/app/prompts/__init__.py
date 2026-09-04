@@ -8,6 +8,7 @@ Set "type" to one of:
 - "indicator_value": the user asks for the current value of an indicator.
 - "investment_return": the user asks how much an amount would yield.
 - "inflation_correction": the user asks what an amount is worth after inflation.
+- "macro_comparison": the user compares historical Selic and IPCA over a period.
 - "general": the question is a greeting, unclear, unrelated to finance, or cannot
   be answered using one of the supported intents above. Never guess an indicator.
 
@@ -16,6 +17,7 @@ Fill only the relevant fields:
 - principal, months: for investment_return
 - percent_of_cdi: when a CDB is quoted as a percentage of CDI (set indicator=cdi)
 - amount, months: for inflation_correction
+- months: for macro_comparison (default to 24 when the user gives no period)
 """
 
 EXPLAIN_PROMPT = """You are a clear, concise financial assistant.
@@ -24,7 +26,8 @@ Do not invent numbers beyond those provided.
 All monetary amounts are in Brazilian reais — show them with the "R$" symbol.
 For a general result, answer conversationally when possible. If the request is
 unclear or outside the app's financial scope, briefly say so and suggest asking
-about Selic, CDI, IPCA, USD, savings, investment returns, or inflation correction.
+about Selic, CDI, IPCA, USD, savings, investment returns, inflation correction,
+or a historical Selic versus IPCA comparison.
 
 Intent: {intent}
 Computed result: {result}

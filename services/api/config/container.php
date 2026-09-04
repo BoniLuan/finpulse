@@ -22,6 +22,7 @@ use FinPulse\Application\Port\HistoricalIndicatorDataProvider;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\IndicatorHistoryRepository;
 use FinPulse\Application\Port\IntentParser;
+use FinPulse\Application\Port\MacroComparisonProvider;
 use FinPulse\Application\Port\NotificationChannel;
 use FinPulse\Application\Port\QueryLogRepository;
 use FinPulse\Application\Port\RateLimitCounter;
@@ -170,6 +171,7 @@ return static function (ContainerBuilder $builder): void {
         AskQuestion::class => static fn (ContainerInterface $c) => new AskQuestion(
             $c->get(IntentParser::class),
             $c->get(IndicatorDataProvider::class),
+            $c->get(MacroComparisonProvider::class),
             $c->get(AnswerWriter::class),
             $c->get(QueryLogRepository::class),
             new FinPulse\Domain\Finance\InvestmentCalculator(),
@@ -191,6 +193,7 @@ return static function (ContainerBuilder $builder): void {
             => new CollectIndicatorHistory($c->get(HistoricalIndicatorDataProvider::class), $c->get(IndicatorHistoryRepository::class)),
         CompareSelicIpca::class => static fn (ContainerInterface $c)
             => new CompareSelicIpca($c->get(IndicatorHistoryRepository::class), new MacroComparisonCalculator()),
+        MacroComparisonProvider::class => static fn (ContainerInterface $c) => $c->get(CompareSelicIpca::class),
         ListIndicatorHistory::class => static fn (ContainerInterface $c)
             => new ListIndicatorHistory($c->get(IndicatorHistoryRepository::class)),
         CreateAlert::class => static fn (ContainerInterface $c)

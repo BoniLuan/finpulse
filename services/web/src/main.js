@@ -62,6 +62,7 @@ const DISPLAY = {
 const SHOWN = ["selic", "ipca", "usd", "btc", "eth"];
 
 const SUGGESTIONS = [
+  "How has Selic changed compared with IPCA during the last 24 months?",
   "How much does 10 thousand in savings yield in 1 year?",
   "What is the current Selic?",
   "How much is 1000 worth adjusted for inflation over 12 months?",

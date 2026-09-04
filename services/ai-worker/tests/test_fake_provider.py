@@ -57,3 +57,27 @@ def test_explain_investment() -> None:
         },
     )
     assert "1061.68" in answer
+
+
+def test_macro_comparison_intent_extracts_period() -> None:
+    intent = FakeProvider().parse_intent(
+        "How has Selic changed compared with IPCA during the last 24 months?"
+    )
+    assert intent == {"type": "macro_comparison", "params": {"months": 24}}
+
+
+def test_macro_comparison_explanation_uses_computed_summary() -> None:
+    answer = FakeProvider().explain(
+        {"type": "macro_comparison", "params": {"months": 24}},
+        {
+            "type": "macro_comparison",
+            "period": {"months": 24},
+            "summary": {
+                "selic_change_pp": 3.4,
+                "ipca_accumulated_pct": 9.44,
+                "real_rate_latest_pct": 9.15,
+            },
+        },
+    )
+    assert "3.40 percentage points" in answer
+    assert "9.44%" in answer

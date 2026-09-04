@@ -24,6 +24,6 @@ final class SelicIpcaComparisonAction
             throw new \InvalidArgumentException('months must be an integer.');
         }
 
-        return $this->json($response, $this->comparison->handle($months));
+        return $this->json($response, $this->comparison->compare($months));
     }
 }

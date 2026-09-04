@@ -43,12 +43,16 @@ def _extract_amount(text: str) -> float:
     return value
 
 
-def _extract_months(text: str) -> int:
+def _extract_months(text: str, default: int = 12) -> int:
     if m := re.search(r"(\d+)\s*year", text):
         return int(m.group(1)) * 12
     if m := re.search(r"(\d+)\s*month", text):
         return int(m.group(1))
-    return 12
+    if m := re.search(r"(\d+)\s*ano", text):
+        return int(m.group(1)) * 12
+    if m := re.search(r"(\d+)\s*m[eê]s", text):
+        return int(m.group(1))
+    return default
 
 
 def _investment_params(text: str) -> dict[str, Any]:
@@ -75,6 +79,28 @@ def _investment_params(text: str) -> dict[str, Any]:
 class FakeProvider:
     def parse_intent(self, question: str) -> dict[str, Any]:
         text = question.lower()
+
+        compares_macro = "selic" in text and any(
+            word in text for word in ("ipca", "inflation", "inflação")
+        )
+        if compares_macro and any(
+            word in text
+            for word in (
+                "compar",
+                "versus",
+                " vs ",
+                "change",
+                "mudou",
+                "histor",
+                "last",
+                "últim",
+                "ultim",
+            )
+        ):
+            return {
+                "type": "macro_comparison",
+                "params": {"months": _extract_months(text, default=24)},
+            }
 
         if any(w in text for w in ("yield", "earn", "invest", "return", "grow", "cdb")):
             return {"type": "investment_return", "params": _investment_params(text)}
@@ -105,6 +131,21 @@ class FakeProvider:
             return (
                 f"R$ {result['amount']:.2f} adjusted for accumulated inflation "
                 f"({result['accumulated_pct']:.2f}%) is worth R$ {result['corrected']:.2f}."
+            )
+        if kind == "macro_comparison":
+            summary = result["summary"]
+            months = result["period"]["months"]
+            required = ("selic_change_pp", "ipca_accumulated_pct", "real_rate_latest_pct")
+            if any(summary.get(key) is None for key in required):
+                return (
+                    "Historical Selic and IPCA data is still being collected. "
+                    "Please try this comparison again shortly."
+                )
+            return (
+                f"Over {months} months, Selic changed "
+                f"{summary['selic_change_pp']:.2f} percentage points while accumulated "
+                f"IPCA was {summary['ipca_accumulated_pct']:.2f}%. The latest estimated "
+                f"real rate is {summary['real_rate_latest_pct']:.2f}% per year."
             )
         if kind == "general":
             return (

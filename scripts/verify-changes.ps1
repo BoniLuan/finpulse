@@ -69,6 +69,7 @@ if ($BuildAffected) {
         }
         if ($file -match '^services/api/(Dockerfile|composer\.(json|lock)|docker/)') {
             [void]$services.Add("api")
+            [void]$services.Add("collector")
             [void]$services.Add("scheduler")
         }
         if ($file -match '^services/ai-worker/(Dockerfile|pyproject\.toml|uv\.lock|requirements.*)') {

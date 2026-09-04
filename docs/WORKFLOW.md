@@ -70,6 +70,8 @@ Check items off as they land. Add new items here before starting them.
       dashboard comparison chart.
 - [x] Deterministic Selic × IPCA analytics: compounded inflation, real-rate
       estimate, monthly correlation, comparison API, and dashboard insights.
+- [x] Natural-language Selic × IPCA queries: structured AI intent,
+      deterministic backend execution, concise explanation, and source citations.
 - [x] `GET /indicators` endpoint so the web widget stops abusing `/ask`.
 - [x] More calculators (Tesouro Selic, CDB %CDI) + their unit tests.
 - [x] Notification channels: `email` (SMTP/Mailpit) + `whatsapp` (Meta Cloud API) (ADR 0006).

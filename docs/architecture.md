@@ -63,7 +63,7 @@ interfaces declared by `Domain`/`Application`; the DI container wires them in
 2. The API validates the JWT, applies global per-IP and AI per-user Redis quotas,
    then runs the `AskQuestion` use case.
 3. Use case calls `ai-worker` `POST /infer/intent` → `{ type, params }`
-   (`indicator_value` | `investment_return` | `inflation_correction`).
+   (`indicator_value` | `investment_return` | `inflation_correction` | `macro_comparison`).
 4. `BacenClient` fetches the needed SGS series (Redis-cached; live HTTP on miss).
 5. A `Domain` service computes the result
    (`InvestmentCalculator` / `InflationCorrector`).
@@ -117,6 +117,12 @@ fetches. The first persisted catalog covers daily Selic and monthly IPCA data;
 the generic schema can accept additional economic series without a new table.
 
 ## Deterministic macro analytics
+
+Natural-language questions classified as `macro_comparison` call the same
+application service. The AI worker receives only the computed period, summary,
+and observation counts; it never calculates the financial metrics or receives
+the full historical payload.
+
 
 `CompareSelicIpca` reads both persisted series for one period and delegates all
 math to the pure `MacroComparisonCalculator` domain service. Daily Selic points

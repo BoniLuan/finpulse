@@ -7,6 +7,7 @@ namespace FinPulse\Application\Ask;
 use FinPulse\Application\Port\AnswerWriter;
 use FinPulse\Application\Port\IndicatorDataProvider;
 use FinPulse\Application\Port\IntentParser;
+use FinPulse\Application\Port\MacroComparisonProvider;
 use FinPulse\Application\Port\QueryLogRepository;
 use FinPulse\Domain\Finance\Indicator;
 use FinPulse\Domain\Finance\InflationCorrector;
@@ -24,6 +25,7 @@ final class AskQuestion
     public function __construct(
         private readonly IntentParser $intentParser,
         private readonly IndicatorDataProvider $data,
+        private readonly MacroComparisonProvider $macroComparison,
         private readonly AnswerWriter $answerWriter,
         private readonly QueryLogRepository $queryLog,
         private readonly InvestmentCalculator $investment,
@@ -39,6 +41,7 @@ final class AskQuestion
             Intent::INDICATOR_VALUE => $this->indicatorValue($intent, $question),
             Intent::INVESTMENT_RETURN => $this->investmentReturn($intent),
             Intent::INFLATION_CORRECTION => $this->inflationCorrection($intent),
+            Intent::MACRO_COMPARISON => $this->macroComparison($intent),
             default => $this->general($question),
         };
 
@@ -118,6 +121,28 @@ final class AskQuestion
         }
 
         return [$data, [$this->source($indicator)]];
+    }
+
+    /** @return array{0: array<string,mixed>, 1: list<array<string,mixed>>} */
+    private function macroComparison(Intent $intent): array
+    {
+        $months = max(1, min(120, (int) $intent->param('months', 24)));
+        $comparison = $this->macroComparison->compare($months);
+        $series = $comparison['series'];
+
+        return [
+            [
+                'type' => Intent::MACRO_COMPARISON,
+                'comparison' => 'selic_ipca',
+                'period' => $comparison['period'],
+                'summary' => $comparison['summary'],
+                'observation_counts' => [
+                    'selic' => count($series[0]['observations']),
+                    'ipca' => count($series[1]['observations']),
+                ],
+            ],
+            [$this->source(Indicator::SELIC), $this->source(Indicator::IPCA)],
+        ];
     }
 
     /** @return array{0: array<string,mixed>, 1: list<array<string,mixed>>} */
