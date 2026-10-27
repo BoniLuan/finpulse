@@ -22,7 +22,7 @@ A monorepo of small services orchestrated by Docker Compose, behind a single
 Nginx gateway.
 
 ```
-   Browser / WhatsApp ──▶ gateway (nginx) ──▶ api (PHP 8.3 + Slim 4)
+   Browser / WhatsApp ──▶ gateway (nginx) ──▶ api (PHP 8.5 + Slim 4)
                                                 │     │
                                   HTTP ─────────┘     ├──▶ PostgreSQL 16
                                   ▼                   └──▶ Redis 7 (cache/ratelimit)
@@ -30,7 +30,7 @@ Nginx gateway.
                        LLM provider selected by env (fake or Gemini)
 ```
 
-- **`services/api`** — PHP 8.3 + Slim 4, clean architecture. Owns business logic
+- **`services/api`** — PHP 8.5 + Slim 4, clean architecture. Owns business logic
   and orchestration: auth (JWT), validation, rate limiting, BACEN ingestion +
   caching, the calculation engine, alerts, and outbound channels.
 - **`services/ai-worker`** — Python 3.12 + FastAPI. AI only: parses natural
@@ -114,3 +114,11 @@ Coinbase's public Data API. Planned next:
 ## License
 
 [MIT](LICENSE)
+
+## Security maintenance — 2026-10-23
+
+Runtime PHP 8.5.12 for API, collector and scheduler; Python 3.12.15 for AI; Nginx 1.30.6. Guzzle/PSR-7 security updates are locked. PHP services have memory/PID limits and bounded logs; upload-progress sessions are disabled at initialization. The AI production dependency set is pinned in `services/ai-worker/requirements.lock` and failed dependency installs stop the build. Upstream images are pinned by OCI digest. API contracts and database schemas are unchanged.
+
+VPS backup and recovery procedures: [shared VPS runbook](https://github.com/BoniLuan/boniluan/blob/main/ops/vps/README.md).
+
+The collector retries transient failures after 30 seconds, then returns to its configured normal interval after a successful collection. This also handles database warm-up after a Docker daemon restart.

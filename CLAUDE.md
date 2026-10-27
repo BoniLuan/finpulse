@@ -21,7 +21,7 @@ together in the same commit.
 If code and docs disagree, that is a bug to fix, not a state to leave.
 
 ## Architecture (monorepo, Docker Compose)
-- `services/api` — PHP 8.3 + Slim 4, clean architecture. Business + orchestration.
+- `services/api` — PHP 8.5 + Slim 4, clean architecture. Business + orchestration.
 - `services/ai-worker` — Python 3.12 + FastAPI. AI only, behind a pluggable LLM provider (fake by default; Gemini in production).
 - `services/web` — static HTML/CSS/JS (ES modules, no build step), served by Nginx. Thin UI: landing, live indicators, chat.
 - `infra/gateway` — Nginx reverse proxy (single entry point).

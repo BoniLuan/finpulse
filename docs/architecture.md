@@ -29,13 +29,13 @@ orchestration; Python owns AI; the frontend is thin.**
 | Service | Tech | Responsibility |
 |---|---|---|
 | `gateway` | Nginx | Single public entry; routes `/api/*` to PHP-FPM and `/*` to the web SPA. |
-| `api` | PHP 8.3 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
+| `api` | PHP 8.5 + Slim 4 | HTTP ingress, auth (JWT), validation, rate limiting, BACEN ingestion + caching, calculation engine, alerts, outbound channels, orchestration. |
 | `ai-worker` | Python 3.12 + FastAPI | NL → intent parsing and NL answer generation, behind a pluggable `LLMProvider`. No business logic, no DB. |
 | `web` | static HTML/CSS/JS (ES modules, no build) | Responsive dashboard, live indicator carousel, chat, contextual history/alerts, and a theme-aware market background. |
 | `db` | PostgreSQL 16 | User profiles/contact destinations, alerts, and authenticated conversation history/query logs. |
 | `redis` | Redis 7 | BACEN/market cache, collector fetch cache, alert cooldowns, and rate-limit counters. |
-| `scheduler` | PHP 8.3 CLI | Evaluates stored alerts on a configured interval. |
-| `collector` | PHP 8.3 CLI | Periodically fetches, normalizes, and upserts BACEN historical observations. |
+| `scheduler` | PHP 8.5 CLI | Evaluates stored alerts on a configured interval. |
+| `collector` | PHP 8.5 CLI | Periodically fetches, normalizes, and upserts BACEN historical observations. |
 | `mailpit` | Mailpit | Internal SMTP sink used until a real SMTP service is configured; UI is exposed only in development. |
 
 The gateway resolves `api` and `web` through Docker's embedded DNS with a short

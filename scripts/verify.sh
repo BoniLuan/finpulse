@@ -39,13 +39,13 @@ fi
 
 if touches "services/ai-worker/*"; then
     echo "Verifying AI worker..."
-    docker build -t finpulse-ai-worker-test services/ai-worker
+    docker build --target development -t finpulse-ai-worker-test services/ai-worker
     docker run --rm finpulse-ai-worker-test sh -c 'pytest -q && ruff check . && mypy app'
 fi
 
 if touches "services/web/*"; then
     echo "Verifying web..."
-    docker run --rm -v "$PWD/services/web:/app:ro" -w /app node:20-alpine \
+    docker run --rm -v "$PWD/services/web:/app:ro" -w /app node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 \
         sh -c 'for file in src/*.js; do node --check "$file"; done'
 fi
 

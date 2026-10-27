@@ -1,10 +1,10 @@
 {
     "name": "finpulse/api",
-    "description": "FinPulse core API — PHP 8.3 + Slim 4, clean architecture.",
+    "description": "FinPulse core API \u2014 PHP 8.5 + Slim 4, clean architecture.",
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.5",
         "ext-pdo": "*",
         "slim/slim": "^4.12",
         "slim/psr7": "^1.6",
@@ -40,7 +40,7 @@
     "config": {
         "sort-packages": true,
         "platform": {
-            "php": "8.3.31"
+            "php": "8.5.12"
         }
     }
 }

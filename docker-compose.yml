@@ -33,12 +33,19 @@ x-api-env: &api-env
   WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
   WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v21.0}
 
+x-logging: &bounded-logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   gateway:
     build: ./infra/gateway
     depends_on:
       - api
       - web
+    logging: *bounded-logs
     restart: unless-stopped
     networks:
       default:
@@ -47,6 +54,9 @@ services:
           - finpulse-gateway
 
   api:
+    mem_limit: 1g
+    pids_limit: 128
+    security_opt: [no-new-privileges:true]
     build: ./services/api
     environment: *api-env
     depends_on:
@@ -55,23 +65,36 @@ services:
       redis:
         condition: service_started
       ai-worker:
-        condition: service_started
+        condition: service_healthy
+    logging: *bounded-logs
     restart: unless-stopped
 
   # Collects normalized economic history independently from HTTP requests.
   collector:
+    mem_limit: 256m
+    pids_limit: 128
+    security_opt: [no-new-privileges:true]
     build: ./services/api
-    command: sh -c 'while true; do php bin/console indicators:collect; sleep "$${COLLECTOR_INTERVAL:-21600}"; done'
+    # Docker daemon restarts do not wait for Compose dependency healthchecks.
+    command: >-
+      sh -c 'while true; do
+      if php bin/console indicators:collect; then
+      sleep "$${COLLECTOR_INTERVAL:-21600}";
+      else sleep 30; fi; done'
     environment: *api-env
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
+    logging: *bounded-logs
     restart: unless-stopped
 
   # Runs alerts:check on an interval so stored alerts fire automatically.
   scheduler:
+    mem_limit: 256m
+    pids_limit: 128
+    security_opt: [no-new-privileges:true]
     build: ./services/api
     command: sh -c 'while true; do php bin/console alerts:check; sleep "$${ALERTS_INTERVAL:-300}"; done'
     environment: *api-env
@@ -80,22 +103,31 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    logging: *bounded-logs
     restart: unless-stopped
 
   ai-worker:
     build: ./services/ai-worker
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 15s
     environment:
       LLM_PROVIDER: ${LLM_PROVIDER:-fake}
       LLM_MODEL: ${LLM_MODEL:-gemini-3.5-flash-lite}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    logging: *bounded-logs
     restart: unless-stopped
 
   web:
     build: ./services/web
+    logging: *bounded-logs
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-finpulse}
       POSTGRES_USER: ${POSTGRES_USER:-finpulse}
@@ -107,15 +139,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging: *bounded-logs
     restart: unless-stopped
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+    logging: *bounded-logs
     restart: unless-stopped
 
   # Local SMTP sink — captures alert emails; web UI exposed in dev (see override).
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.31.6@sha256:23fe39e81bde596a918000b3135c0f85dc8bb4c9ea6be274b051143f3e300387
+    logging: *bounded-logs
     restart: unless-stopped
 
 volumes:
